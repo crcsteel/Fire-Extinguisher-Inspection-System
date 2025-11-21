@@ -37,17 +37,18 @@
       }
     }
 
-    async function submitInspectionToServer(record) {
-      const res = await fetch(API_BASE, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'submitInspection',
-          payload: record
-        })
-      });
-      return res.json();
-    }
+async function submitInspectionToServer(record) {
+  const res = await fetch(API_BASE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'submitInspection',
+      payload: record
+    })
+  });
+
+  return res.json();
+}
 
     // ========== Navigation ==========
 
@@ -232,21 +233,21 @@
       submitBtn.disabled = true;
       submitBtnText.textContent = 'Submitting...';
 
-    const inspectionRecord = {
-    equipment_id: currentEquipmentId,
-    inspector_name: inspectorName,
+const inspectionRecord = {
+  equipment_id: currentEquipmentId,
+  inspector_name: inspectorName,
 
-    pressure_ok: inspectionData.pressure,
-    no_damage: inspectionData.damage,
-    seal_intact: inspectionData.seal,
-    label_readable: inspectionData.label,
-    weight_ok: inspectionData.weight,
-    hose_ok: inspectionData.hose,
-    expiry_valid: inspectionData.expiry,
+  pressure_ok: inspectionData.pressure,
+  no_damage: inspectionData.damage,
+  seal_intact: inspectionData.seal,
+  label_readable: inspectionData.label,
+  weight_ok: inspectionData.weight,
+  hose_ok: inspectionData.hose,
+  expiry_valid: inspectionData.expiry,
 
-    remarks: remarks,
-    result: result
-    };
+  remarks: remarks,
+  result: result
+};
 
 
       try {

@@ -9,10 +9,16 @@
       overflow-x: hidden;
     }
 
-* {
-  font-family: 'K2D' !important;
-}
+    /* ใช้ K2D ทุกอย่าง */
+    * {
+      font-family: 'K2D', sans-serif;
+    }
 
+    /* ยกเว้นไอคอน FontAwesome ไม่ให้โดนทับ */
+    .fa-solid, .fa-regular, .fa-brands, .fas, .far, .fab {
+      font-family: "Font Awesome 6 Free" !important;
+      font-weight: 900 !important;
+    }
 
     .app-container {
       max-width: 480px;

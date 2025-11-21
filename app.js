@@ -232,20 +232,22 @@
       submitBtn.disabled = true;
       submitBtnText.textContent = 'Submitting...';
 
-      const inspectionRecord = {
-        equipment_id: currentEquipmentId,
-        inspector_name: inspectorName,
-        inspection_date: new Date().toISOString(),
-        pressure_ok: inspectionData.pressure,
-        no_damage: inspectionData.damage,
-        seal_intact: inspectionData.seal,
-        label_readable: inspectionData.label,
-        weight_ok: inspectionData.weight,
-        hose_ok: inspectionData.hose,
-        expiry_valid: inspectionData.expiry,
-        remarks: remarks,
-        result: result
-      };
+    const inspectionRecord = {
+    equipment_id: currentEquipmentId,
+    inspector_name: inspectorName,
+
+    pressure_ok: inspectionData.pressure,
+    no_damage: inspectionData.damage,
+    seal_intact: inspectionData.seal,
+    label_readable: inspectionData.label,
+    weight_ok: inspectionData.weight,
+    hose_ok: inspectionData.hose,
+    expiry_valid: inspectionData.expiry,
+
+    remarks: remarks,
+    result: result
+    };
+
 
       try {
         const serverResult = await submitInspectionToServer(inspectionRecord);

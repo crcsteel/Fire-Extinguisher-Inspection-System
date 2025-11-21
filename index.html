@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fire Extinguisher Inspection System</title>
+
+  <!-- jsQR สำหรับอ่าน QR จากกล้อง -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .app-container {
+      max-width: 480px;
+      margin: 0 auto;
+      background: white;
+      min-height: 100vh;
+      position: relative;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .header p {
+      margin: 4px 0 0 0;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    /* Home Screen */
+    .scan-hero {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .scan-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+    }
+
+    .scan-button {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      border: none;
+      padding: 18px 40px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      max-width: 300px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      transition: all 0.2s;
+    }
+
+    .scan-button:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .stat-card {
+      background: #f1f5f9;
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #3b82f6;
+      margin: 0;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #64748b;
+      margin: 4px 0 0 0;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-good {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-service {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-expired {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .info-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .info-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .checklist-item {
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .checklist-question {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #1e293b;
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn.active-yes {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #166534;
+    }
+
+    .toggle-btn.active-no {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+
+    .toggle-btn.active-na {
+      background: #e0e7ff;
+      border-color: #6366f1;
+      color: #3730a3;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    textarea.form-input {
+      min-height: 80px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+      margin-top: 12px;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-success:active {
+      transform: scale(0.98);
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+      color: #94a3b8;
+      transition: color 0.2s;
+      border: none;
+      background: none;
+      font-size: 11px;
+    }
+
+    .nav-item.active {
+      color: #3b82f6;
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    .result-icon {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+
+    .result-pass {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .result-fail {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .result-title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .result-subtitle {
+      text-align: center;
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .history-item {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .history-item:active {
+      transform: scale(0.98);
+      background: #f8fafc;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .history-id {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .history-date {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .history-inspector {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: #64748b;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .mt-24 {
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <div class="header">
+      <h1 id="app-title">Fire Safety Inspection</h1>
+      <p id="company-name">Professional Safety Services</p>
+    </div>
+
+    <!-- Home Screen -->
+    <div id="home-screen" class="screen active">
+      <div class="content">
+        <div class="scan-hero">
+          <div class="scan-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
+            </svg>
+          </div>
+          <h2 style="margin:0 0 8px 0;font-size:22px;">Ready to Inspect</h2>
+          <p style="color:#64748b;margin:0 0 32px 0;">Scan extinguisher QR code to begin</p>
+          <button id="scan-btn" class="scan-button">
+            <span id="scan-button-text">🔍 Scan QR Code</span>
+          </button>
+        </div>
+
+        <div class="quick-stats">
+          <div class="stat-card">
+            <p class="stat-value" id="today-count">0</p>
+            <p class="stat-label">Today</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-value" id="total-count">0</p>
+            <p class="stat-label">Total</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Screen -->
+    <div id="detail-screen" class="screen">
+      <div class="content">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title" id="detail-equipment-id">-</h3>
+            <span class="badge badge-good" id="detail-status">-</span>
+          </div>
+          <div style="text-align:center;margin:24px 0;">
+            <div style="width:80px;height:80px;margin:0 auto;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 10 12 6.16-1.26 10-6.45 10-12V7l-10-5z" />
+                <path d="M12 8v4m0 4h.01" />
+              </svg>
+            </div>
+          </div>
+          <div class="info-grid">
+            <div class="info-row">
+              <span class="info-label">Location</span>
+              <span class="info-value" id="detail-location">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Type</span>
+              <span class="info-value" id="detail-type">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Size</span>
+              <span class="info-value" id="detail-size">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Last Inspection</span>
+              <span class="info-value" id="detail-last-inspection">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Expiry Date</span>
+              <span class="info-value" id="detail-expiry">-</span>
+            </div>
+          </div>
+        </div>
+        <button id="start-inspection-btn" class="btn btn-primary">Start Inspection</button>
+        <button id="back-to-home-btn" class="btn btn-secondary">Back to Home</button>
+      </div>
+    </div>
+
+    <!-- Inspection Screen -->
+    <div id="inspection-screen" class="screen">
+      <div class="content">
+        <h2 id="inspection-title" style="margin:0 0 8px 0;font-size:20px;font-weight:700;">Safety Checklist</h2>
+        <p style="color:#64748b;margin:0 0 24px 0;font-size:14px;">
+          Equipment: <span id="inspection-equipment-id">-</span>
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="inspector-name">Inspector Name</label>
+          <input type="text" id="inspector-name" class="form-input" placeholder="Enter your name" />
+        </div>
+
+        <!-- Checklist 7 ข้อ -->
+        <div class="checklist-item">
+          <div class="checklist-question">1. Pressure level within range?</div>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-question="pressure" data-value="yes">✓ Yes</button>
+            <button class="toggle-btn" data-question="pressure" data-value="no">✗ No</button>
+            <button class="toggle-btn" data-question="pressure" data-value="na">− N/A</button>
+          </div>
+        </div>
+
+        <div class="checklist-item">
+          <div class="checklist-question">2. No visible damage or corrosion?</div>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-question="damage" data-value="yes">✓ Yes</button>
+            <button class="toggle-btn" data-question="damage" data-value="no">✗ No</button>
+            <button class="toggle-btn" data-question="damage" data-value="na">− N/A</button>
+          </div>
+        </div>
+
+        <div class="checklist-item">
+          <div class="checklist-question">3. Pin and seal intact?</div>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-question="seal" data-value="yes">✓ Yes</button>
+            <button class="toggle-btn" data-question="seal" data-value="no">✗ No</button>
+            <button class="toggle-btn" data-question="seal" data-value="na">− N/A</button>
+          </div>
+        </div>
+
+        <div class="checklist-item">
+          <div class="checklist-question">4. Label readable and legible?</div>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-question="label" data-value="yes">✓ Yes</button>
+            <button class="toggle-btn" data-question="label" data-value="no">✗ No</button>
+            <button class="toggle-btn" data-question="label" data-value="na">− N/A</button>
+          </div>
+        </div>
+
+        <div class="checklist-item">
+          <div class="checklist-question">5. Weight within acceptable range?</div>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-question="weight" data-value="yes">✓ Yes</button>
+            <button class="toggle-btn" data-question="weight" data-value="no">✗ No</button>
+            <button class="toggle-btn" data-question="weight" data-value="na">− N/A</button>
+          </div>
+        </div>
+
+        <div class="checklist-item">
+          <div class="checklist-question">6. Hose in good condition?</div>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-question="hose" data-value="yes">✓ Yes</button>
+            <button class="toggle-btn" data-question="hose" data-value="no">✗ No</button>
+            <button class="toggle-btn" data-question="hose" data-value="na">− N/A</button>
+          </div>
+        </div>
+
+        <div class="checklist-item">
+          <div class="checklist-question">7. Expiry date still valid?</div>
+          <div class="toggle-group">
+            <button class="toggle-btn" data-question="expiry" data-value="yes">✓ Yes</button>
+            <button class="toggle-btn" data-question="expiry" data-value="no">✗ No</button>
+            <button class="toggle-btn" data-question="expiry" data-value="na">− N/A</button>
+          </div>
+        </div>
+
+        <div class="form-group mt-24">
+          <label class="form-label" for="remarks">Additional Remarks</label>
+          <textarea id="remarks" class="form-input" placeholder="Enter any additional observations..."></textarea>
+        </div>
+
+        <button id="submit-inspection-btn" class="btn btn-success" disabled>
+          <span id="submit-btn-text">Submit Inspection</span>
+        </button>
+        <button id="cancel-inspection-btn" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="result-screen" class="screen">
+      <div class="content">
+        <div style="padding:40px 20px;">
+          <div class="result-icon result-pass" id="result-icon">✓</div>
+          <h2 class="result-title" id="result-title">Inspection Complete</h2>
+          <p class="result-subtitle" id="result-subtitle">Equipment passed all safety checks</p>
+
+          <div class="card">
+            <div class="info-grid">
+              <div class="info-row">
+                <span class="info-label">Equipment ID</span>
+                <span class="info-value" id="result-equipment-id">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Inspector</span>
+                <span class="info-value" id="result-inspector">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Date &amp; Time</span>
+                <span class="info-value" id="result-timestamp">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Result</span>
+                <span class="info-value" id="result-status">-</span>
+              </div>
+            </div>
+          </div>
+
+          <button id="new-inspection-btn" class="btn btn-primary mt-24">New Inspection</button>
+          <button id="view-history-btn" class="btn btn-secondary">View History</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Screen -->
+    <div id="history-screen" class="screen">
+      <div class="content">
+        <h2 style="margin:0 0 20px 0;font-size:20px;font-weight:700;">Inspection History</h2>
+        <div id="history-list"></div>
+        <div id="history-empty" class="loading" style="display:none;">
+          <p>No inspections recorded yet</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan Screen -->
+    <div id="scan-screen" class="screen">
+      <div class="content">
+        <h2 style="margin-bottom:16px;">Scan QR Code</h2>
+        <video id="qr-video" style="width:100%;border-radius:12px;background:#000;"></video>
+        <p id="scan-status" style="text-align:center;margin-top:12px;color:#64748b;">
+          Point the camera at the QR code...
+        </p>
+        <button id="stop-scan-btn" class="btn btn-secondary" style="margin-top:16px;">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+      <button class="nav-item active" data-screen="home">
+        <div class="nav-icon">🏠</div>
+        <div>Home</div>
+      </button>
+      <button class="nav-item" data-screen="scan">
+        <div class="nav-icon">📷</div>
+        <div>Scan</div>
+      </button>
+      <button class="nav-item" data-screen="history">
+        <div class="nav-icon">📋</div>
+        <div>History</div>
+      </button>
+      <button class="nav-item" data-screen="profile">
+        <div class="nav-icon">👤</div>
+        <div>Profile</div>
+      </button>
+    </div>
+  </div>
+
+  <script>
+
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbyJdmffRh-Ip4Rs1UUWgV0nJLyF1hdRItaropGm6KMqyiKu_fUQh2BaRntV0w5JJF4/exec'; 
+
+    let currentScreen = 'home';
+    let currentEquipmentId = null;
+    let currentExtinguisher = null;
+    let inspectionData = {};
+    let allInspections = [];
+    let videoStream = null;
+
+    // ========== Helper เรียก API ==========
+
+    async function fetchExtinguisherById(id) {
+      try {
+        const res = await fetch(`${API_BASE}?action=getExtinguisher&id=${encodeURIComponent(id)}`);
+        const data = await res.json();
+        if (!data.success) return null;
+        return data.extinguisher;
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    }
+
+    async function loadInspections() {
+      try {
+        const res = await fetch(`${API_BASE}?action=getInspections`);
+        const data = await res.json();
+        if (data.success) {
+          allInspections = data.inspections || [];
+          updateStats();
+          if (currentScreen === 'history') {
+            renderHistory();
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function submitInspectionToServer(record) {
+      const res = await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'submitInspection',
+          payload: record
+        })
+      });
+      return res.json();
+    }
+
+    // ========== Navigation ==========
+
+    function navigateToScreen(screenName) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+      const screenMap = {
+        home: 'home-screen',
+        scan: 'scan-screen',
+        history: 'history-screen',
+        profile: 'home-screen'
+      };
+
+      const targetScreen = screenMap[screenName] || 'home-screen';
+      document.getElementById(targetScreen).classList.add('active');
+
+      document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.dataset.screen === screenName) {
+          item.classList.add('active');
+        }
+      });
+
+      currentScreen = screenName;
+
+      if (screenName === 'history') {
+        renderHistory();
+      }
+    }
+
+    // ========== QR Scanner ==========
+
+    async function openQRScanner() {
+      stopQRScanner();
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('scan-screen').classList.add('active');
+      currentScreen = 'scan';
+
+      const video = document.getElementById('qr-video');
+      const scanStatus = document.getElementById('scan-status');
+
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+
+        video.srcObject = videoStream;
+        video.setAttribute('playsinline', true);
+        await video.play();
+
+        scanStatus.textContent = 'Scanning...';
+        requestAnimationFrame(scanQRFrame);
+      } catch (e) {
+        console.error(e);
+        scanStatus.textContent = 'Camera error or permission denied';
+      }
+    }
+
+    function scanQRFrame() {
+      const video = document.getElementById('qr-video');
+
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, canvas.width, canvas.height);
+
+        if (code) {
+          handleScanResult(code.data);
+          return;
+        }
+      }
+
+      if (currentScreen === 'scan') {
+        requestAnimationFrame(scanQRFrame);
+      }
+    }
+
+    async function handleScanResult(qrText) {
+      const id = qrText.trim();
+      const scanStatus = document.getElementById('scan-status');
+      scanStatus.textContent = 'Checking ID: ' + id + ' ...';
+
+      stopQRScanner();
+
+      const extinguisher = await fetchExtinguisherById(id);
+      if (!extinguisher) {
+        alert('QR not recognized or not in database: ' + id);
+        navigateToScreen('home');
+        return;
+      }
+
+      currentExtinguisher = extinguisher;
+      currentEquipmentId = extinguisher.id;
+      showDetailScreen(extinguisher);
+    }
+
+    function stopQRScanner() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(t => t.stop());
+        videoStream = null;
+      }
+    }
+
+    // ========== Detail / Inspection / Result / History ==========
+
+    function showDetailScreen(extinguisher) {
+      if (!extinguisher) return;
+
+      document.getElementById('detail-equipment-id').textContent = extinguisher.id;
+      document.getElementById('detail-location').textContent = extinguisher.location || '-';
+      document.getElementById('detail-type').textContent = extinguisher.type || '-';
+      document.getElementById('detail-size').textContent = extinguisher.size || '-';
+      document.getElementById('detail-last-inspection').textContent = extinguisher.lastInspection || '-';
+      document.getElementById('detail-expiry').textContent = extinguisher.expiry || '-';
+
+      const statusBadge = document.getElementById('detail-status');
+      statusBadge.textContent = extinguisher.status || '-';
+      statusBadge.className = 'badge';
+      if (extinguisher.status === 'Good') {
+        statusBadge.classList.add('badge-good');
+      } else if (extinguisher.status === 'Need Service') {
+        statusBadge.classList.add('badge-service');
+      } else {
+        statusBadge.classList.add('badge-expired');
+      }
+
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('detail-screen').classList.add('active');
+      currentScreen = 'detail';
+    }
+
+    function startInspection() {
+      inspectionData = {
+        pressure: null,
+        damage: null,
+        seal: null,
+        label: null,
+        weight: null,
+        hose: null,
+        expiry: null
+      };
+
+      document.getElementById('inspector-name').value = '';
+      document.getElementById('remarks').value = '';
+      document.getElementById('inspection-equipment-id').textContent = currentEquipmentId || '-';
+
+      document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.classList.remove('active-yes', 'active-no', 'active-na');
+      });
+
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('inspection-screen').classList.add('active');
+      currentScreen = 'inspection';
+
+      updateSubmitButton();
+    }
+
+    function updateSubmitButton() {
+      const allAnswered = Object.values(inspectionData).every(val => val !== null);
+      const inspectorName = document.getElementById('inspector-name').value.trim();
+      const submitBtn = document.getElementById('submit-inspection-btn');
+
+      submitBtn.disabled = !(allAnswered && inspectorName);
+    }
+
+    async function submitInspection() {
+      const inspectorName = document.getElementById('inspector-name').value.trim();
+      const remarks = document.getElementById('remarks').value.trim();
+
+      const failCount = Object.values(inspectionData).filter(v => v === 'no').length;
+      const result = failCount === 0 ? 'Pass' : 'Fail';
+
+      const submitBtn = document.getElementById('submit-inspection-btn');
+      const submitBtnText = document.getElementById('submit-btn-text');
+      submitBtn.disabled = true;
+      submitBtnText.textContent = 'Submitting...';
+
+      const inspectionRecord = {
+        equipment_id: currentEquipmentId,
+        inspector_name: inspectorName,
+        inspection_date: new Date().toISOString(),
+        pressure_ok: inspectionData.pressure,
+        no_damage: inspectionData.damage,
+        seal_intact: inspectionData.seal,
+        label_readable: inspectionData.label,
+        weight_ok: inspectionData.weight,
+        hose_ok: inspectionData.hose,
+        expiry_valid: inspectionData.expiry,
+        remarks: remarks,
+        result: result
+      };
+
+      try {
+        const serverResult = await submitInspectionToServer(inspectionRecord);
+
+        if (serverResult.success) {
+          allInspections.push(inspectionRecord);
+          updateStats();
+          showResultScreen(result, inspectorName);
+        } else {
+          submitBtnText.textContent = 'Error - Try Again';
+          setTimeout(() => {
+            submitBtnText.textContent = 'Submit Inspection';
+            submitBtn.disabled = false;
+          }, 2000);
+        }
+      } catch (err) {
+        console.error(err);
+        submitBtnText.textContent = 'Error - Try Again';
+        setTimeout(() => {
+          submitBtnText.textContent = 'Submit Inspection';
+          submitBtn.disabled = false;
+        }, 2000);
+      }
+    }
+
+    function showResultScreen(result, inspectorName) {
+      const resultIcon = document.getElementById('result-icon');
+      const resultTitle = document.getElementById('result-title');
+      const resultSubtitle = document.getElementById('result-subtitle');
+
+      if (result === 'Pass') {
+        resultIcon.className = 'result-icon result-pass';
+        resultIcon.textContent = '✓';
+        resultTitle.textContent = 'Inspection Complete';
+        resultSubtitle.textContent = 'Equipment passed all safety checks';
+      } else {
+        resultIcon.className = 'result-icon result-fail';
+        resultIcon.textContent = '✗';
+        resultTitle.textContent = 'Service Required';
+        resultSubtitle.textContent = 'Equipment requires maintenance';
+      }
+
+      document.getElementById('result-equipment-id').textContent = currentEquipmentId || '-';
+      document.getElementById('result-inspector').textContent = inspectorName || '-';
+      document.getElementById('result-timestamp').textContent = new Date().toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      document.getElementById('result-status').textContent = result;
+
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('result-screen').classList.add('active');
+      currentScreen = 'result';
+    }
+
+    function renderHistory() {
+      const historyList = document.getElementById('history-list');
+      const historyEmpty = document.getElementById('history-empty');
+
+      if (allInspections.length === 0) {
+        historyList.innerHTML = '';
+        historyEmpty.style.display = 'block';
+        return;
+      }
+
+      historyEmpty.style.display = 'none';
+
+      const sortedInspections = [...allInspections].sort((a, b) =>
+        new Date(b.inspection_date) - new Date(a.inspection_date)
+      );
+
+      historyList.innerHTML = sortedInspections.map(inspection => {
+        const date = new Date(inspection.inspection_date);
+        const formattedDate = date.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+
+        const badgeClass = inspection.result === 'Pass' ? 'badge-good' : 'badge-service';
+
+        return `
+          <div class="history-item">
+            <div class="history-header">
+              <span class="history-id">${inspection.equipment_id}</span>
+              <span class="badge ${badgeClass}">${inspection.result}</span>
+            </div>
+            <div class="history-inspector">Inspector: ${inspection.inspector_name}</div>
+            <div class="history-date">${formattedDate}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateStats() {
+      const today = new Date().toDateString();
+      const todayInspections = allInspections.filter(i =>
+        new Date(i.inspection_date).toDateString() === today
+      );
+
+      document.getElementById('today-count').textContent = todayInspections.length;
+      document.getElementById('total-count').textContent = allInspections.length;
+    }
+
+    // ========== Event Listeners ==========
+
+    document.getElementById('scan-btn').addEventListener('click', openQRScanner);
+
+    document.getElementById('start-inspection-btn').addEventListener('click', startInspection);
+
+    document.getElementById('back-to-home-btn').addEventListener('click', () => {
+      stopQRScanner();
+      navigateToScreen('home');
+    });
+
+    document.getElementById('cancel-inspection-btn').addEventListener('click', () => {
+      stopQRScanner();
+      navigateToScreen('home');
+    });
+
+    document.getElementById('new-inspection-btn').addEventListener('click', () => {
+      stopQRScanner();
+      navigateToScreen('home');
+    });
+
+    document.getElementById('view-history-btn').addEventListener('click', () => {
+      navigateToScreen('history');
+    });
+
+    document.getElementById('inspector-name').addEventListener('input', updateSubmitButton);
+
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const question = btn.dataset.question;
+        const value = btn.dataset.value;
+
+        document.querySelectorAll(`.toggle-btn[data-question="${question}"]`).forEach(b => {
+          b.classList.remove('active-yes', 'active-no', 'active-na');
+        });
+
+        btn.classList.add(`active-${value}`);
+        inspectionData[question] = value;
+        updateSubmitButton();
+      });
+    });
+
+    document.getElementById('submit-inspection-btn').addEventListener('click', submitInspection);
+
+    document.getElementById('stop-scan-btn').addEventListener('click', () => {
+      stopQRScanner();
+      navigateToScreen('home');
+    });
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const screen = item.dataset.screen;
+
+        if (screen === 'scan') {
+          openQRScanner();
+          return;
+        }
+
+        stopQRScanner();
+        navigateToScreen(screen);
+      });
+    });
+
+    // ========== Init ==========
+
+    (async function init() {
+      await loadInspections();
+    })();
+  </script>
+</body>
+</html>

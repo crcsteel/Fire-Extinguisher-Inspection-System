@@ -234,6 +234,8 @@ async function submitInspectionToServer(record) {
       submitBtnText.textContent = 'Submitting...';
 
 const inspectionRecord = {
+  inspection_date: new Date().toISOString(),   // <<<<<< สำคัญมาก ต้องมี!
+
   equipment_id: currentEquipmentId,
   inspector_name: inspectorName,
 

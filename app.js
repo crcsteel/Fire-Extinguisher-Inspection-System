@@ -1,10 +1,11 @@
 /************************************************************
- * FIRE EXTINGUISHER INSPECTION — FRONTEND JS
+ * FIRE EXTINGUISHER INSPECTION — FRONTEND JS (FIXED + SYNC)
  ************************************************************/
 
-const API_BASE = 'https://script.google.com/macros/s/AKfycbyJdmffRh-Ip4Rs1UUWgV0nJLyF1hdRItaropGm6KMqyiKu_fUQh2BaRntV0w5JJF4/exec';
+const API_BASE =
+  "https://script.google.com/macros/s/AKfycbyJdmffRh-Ip4Rs1UUWgV0nJLyF1hdRItaropGm6KMqyiKu_fUQh2BaRntV0w5JJF4/exec";
 
-let currentScreen = 'home';
+let currentScreen = "home";
 let currentEquipmentId = null;
 let currentExtinguisher = null;
 let inspectionData = {};
@@ -17,11 +18,14 @@ let videoStream = null;
 
 async function fetchExtinguisherById(id) {
   try {
-    const res = await fetch(`${API_BASE}?action=getExtinguisher&id=${encodeURIComponent(id)}`);
+    const res = await fetch(
+      `${API_BASE}?action=getExtinguisher&id=${encodeURIComponent(id)}`
+    );
     const data = await res.json();
     if (!data.success) return null;
     return data.extinguisher;
   } catch (err) {
+    console.error(err);
     return null;
   }
 }
@@ -40,16 +44,20 @@ async function loadInspections() {
 }
 
 async function submitInspectionToServer(record) {
-  const res = await fetch(API_BASE, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'submitInspection',
-      payload: record
-    })
-  });
-
-  return res.json();
+  try {
+    const res = await fetch(API_BASE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "submitInspection",
+        payload: record,
+      }),
+    });
+    return res.json();
+  } catch (err) {
+    console.error(err);
+    return { success: false };
+  }
 }
 
 /************************************************************
@@ -57,19 +65,21 @@ async function submitInspectionToServer(record) {
  ************************************************************/
 
 function navigateToScreen(screenName) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
 
   const screenMap = {
-    home: 'home-screen',
-    scan: 'scan-screen',
-    history: 'history-screen',
-    profile: 'home-screen'
+    home: "home-screen",
+    scan: "scan-screen",
+    detail: "detail-screen",
+    inspection: "inspection-screen",
+    result: "result-screen",
+    history: "history-screen",
   };
 
-  document.getElementById(screenMap[screenName]).classList.add('active');
+  document.getElementById(screenMap[screenName]).classList.add("active");
   currentScreen = screenName;
 
-  if (screenName === 'history') renderHistory();
+  if (screenName === "history") renderHistory();
 }
 
 /************************************************************
@@ -78,28 +88,29 @@ function navigateToScreen(screenName) {
 
 async function openQRScanner() {
   stopQRScanner();
-  navigateToScreen('scan');
+  navigateToScreen("scan");
 
-  const video = document.getElementById('qr-video');
-  const scanStatus = document.getElementById('scan-status');
+  const video = document.getElementById("qr-video");
+  const scanStatus = document.getElementById("scan-status");
 
   try {
-    videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+    });
 
     video.srcObject = videoStream;
-    video.setAttribute('playsinline', true);
+    video.setAttribute("playsinline", true);
     await video.play();
 
     scanStatus.textContent = "Scanning...";
     requestAnimationFrame(scanQRFrame);
-
   } catch (err) {
     scanStatus.textContent = "Camera error";
   }
 }
 
 function scanQRFrame() {
-  const video = document.getElementById('qr-video');
+  const video = document.getElementById("qr-video");
 
   if (video.readyState === video.HAVE_ENOUGH_DATA) {
     const canvas = document.createElement("canvas");
@@ -124,25 +135,26 @@ function scanQRFrame() {
 
 async function handleScanResult(text) {
   const id = text.trim();
-  const scanStatus = document.getElementById('scan-status');
+  const scanStatus = document.getElementById("scan-status");
   scanStatus.textContent = `Checking ${id} ...`;
 
   const extinguisher = await fetchExtinguisherById(id);
 
   if (!extinguisher) {
     alert("ID not found: " + id);
-    navigateToScreen('home');
+    navigateToScreen("home");
     return;
   }
 
   currentExtinguisher = extinguisher;
   currentEquipmentId = extinguisher.id;
+
   showDetailScreen(extinguisher);
 }
 
 function stopQRScanner() {
   if (videoStream) {
-    videoStream.getTracks().forEach(t => t.stop());
+    videoStream.getTracks().forEach((t) => t.stop());
     videoStream = null;
   }
 }
@@ -157,7 +169,7 @@ function showDetailScreen(ext) {
   document.getElementById("detail-type").textContent = ext.type;
   document.getElementById("detail-size").textContent = ext.size;
   document.getElementById("detail-last-inspection").textContent = ext.lastInspection;
-  document.getElementById("detail-expiry").textContent = ext.expiry;
+  document.getElementById("detail-expiry").textContent = ext.expiryDate;
 
   navigateToScreen("detail");
 }
@@ -168,55 +180,51 @@ function showDetailScreen(ext) {
 
 function startInspection() {
   inspectionData = {
-    pressure: null,
-    damage: null,
-    seal: null,
-    label: null,
-    weight: null,
-    hose: null,
-    expiry: null
+    pressure_ok: null,
+    no_damage: null,
+    seal_intact: null,
+    label_readable: null,
+    weight_ok: null,
+    hose_ok: null,
+    expiry_valid: null,
   };
 
   document.getElementById("inspector-name").value = "";
   document.getElementById("remarks").value = "";
-  document.querySelectorAll(".toggle-btn").forEach(btn => {
+  document.querySelectorAll(".toggle-btn").forEach((btn) => {
     btn.classList.remove("active-yes", "active-no");
   });
 
-  document.getElementById("inspection-equipment-id").textContent = currentEquipmentId;
+  document.getElementById("inspection-equipment-id").textContent =
+    currentEquipmentId;
 
   navigateToScreen("inspection");
 }
 
 function updateSubmitButton() {
-  const allFilled = Object.values(inspectionData).every(v => v !== null);
+  const allFilled = Object.values(inspectionData).every((v) => v !== null);
   const inspectorName = document.getElementById("inspector-name").value.trim();
 
-  document.getElementById("submit-inspection-btn").disabled = !(allFilled && inspectorName);
+  document.getElementById("submit-inspection-btn").disabled = !(
+    allFilled && inspectorName
+  );
 }
 
 async function submitInspection() {
   const inspectorName = document.getElementById("inspector-name").value.trim();
   const remarks = document.getElementById("remarks").value.trim();
 
-  const failCount = Object.values(inspectionData).filter(v => v === "no").length;
+  const failCount =
+    Object.values(inspectionData).filter((v) => v === "no").length;
+
   const result = failCount === 0 ? "Pass" : "Fail";
 
   const record = {
-    inspection_date: new Date().toISOString(),
     equipment_id: currentEquipmentId,
     inspector_name: inspectorName,
-
-    pressure_ok: inspectionData.pressure,
-    no_damage: inspectionData.damage,
-    seal_intact: inspectionData.seal,
-    label_readable: inspectionData.label,
-    weight_ok: inspectionData.weight,
-    hose_ok: inspectionData.hose,
-    expiry_valid: inspectionData.expiry,
-
+    ...inspectionData,
     remarks: remarks,
-    result: result
+    result: result,
   };
 
   const res = await submitInspectionToServer(record);
@@ -226,7 +234,11 @@ async function submitInspection() {
     return;
   }
 
-  allInspections.push(record);
+  allInspections.push({
+    ...record,
+    inspection_date: new Date().toISOString(),
+  });
+
   updateStats();
   showResultScreen(result, inspectorName);
 }
@@ -236,7 +248,8 @@ async function submitInspection() {
  ************************************************************/
 
 function showResultScreen(result, inspector) {
-  document.getElementById("result-equipment-id").textContent = currentEquipmentId;
+  document.getElementById("result-equipment-id").textContent =
+    currentEquipmentId;
   document.getElementById("result-status").textContent = result;
   document.getElementById("result-inspector").textContent = inspector;
 
@@ -256,14 +269,19 @@ function renderHistory() {
   }
 
   container.innerHTML = allInspections
-    .sort((a, b) => new Date(b.inspection_date) - new Date(a.inspection_date))
-    .map(i => `
+    .sort(
+      (a, b) =>
+        new Date(b.inspection_date) - new Date(a.inspection_date)
+    )
+    .map(
+      (i) => `
       <div class="history-item">
         <div><b>${i.equipment_id}</b> — ${i.result}</div>
         <div>${i.inspector_name}</div>
         <div>${new Date(i.inspection_date).toLocaleString()}</div>
       </div>
-    `)
+    `
+    )
     .join("");
 }
 
@@ -273,10 +291,14 @@ function renderHistory() {
 
 function updateStats() {
   const today = new Date().toDateString();
-  const todayCount = allInspections.filter(i => new Date(i.inspection_date).toDateString() === today).length;
+  const todayCount = allInspections.filter(
+    (i) =>
+      new Date(i.inspection_date).toDateString() === today
+  ).length;
 
   document.getElementById("today-count").textContent = todayCount;
-  document.getElementById("total-count").textContent = allInspections.length;
+  document.getElementById("total-count").textContent =
+    allInspections.length;
 }
 
 /************************************************************
@@ -288,16 +310,19 @@ function updateStats() {
 })();
 
 /************************************************************
- * EVENT LISTENERS
+ * EVENT LISTENERS (Toggle Buttons)
  ************************************************************/
 
-document.querySelectorAll(".toggle-btn").forEach(btn => {
+document.querySelectorAll(".toggle-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    const q = btn.dataset.question;
+    const q = btn.dataset.map; // ⭐ เปลี่ยนจาก question → map (ตรงกับ GAS)
     const value = btn.dataset.value;
 
-    document.querySelectorAll(`.toggle-btn[data-question="${q}"]`)
-      .forEach(b => b.classList.remove("active-yes", "active-no"));
+    document
+      .querySelectorAll(`.toggle-btn[data-map="${q}"]`)
+      .forEach((b) =>
+        b.classList.remove("active-yes", "active-no")
+      );
 
     btn.classList.add(value === "yes" ? "active-yes" : "active-no");
 

@@ -1,5 +1,5 @@
 /************************************************************
- * FIRE EXTINGUISHER INSPECTION — FRONTEND JS (FIXED + SYNC)
+ * FIRE EXTINGUISHER INSPECTION — FRONTEND JS (FULL 100%)
  ************************************************************/
 
 const API_BASE =
@@ -65,7 +65,9 @@ async function submitInspectionToServer(record) {
  ************************************************************/
 
 function navigateToScreen(screenName) {
-  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  document.querySelectorAll(".screen").forEach((s) =>
+    s.classList.remove("active")
+  );
 
   const screenMap = {
     home: "home-screen",
@@ -74,10 +76,14 @@ function navigateToScreen(screenName) {
     inspection: "inspection-screen",
     result: "result-screen",
     history: "history-screen",
+    profile: "profile-screen"
   };
 
-  document.getElementById(screenMap[screenName]).classList.add("active");
-  currentScreen = screenName;
+  const target = document.getElementById(screenMap[screenName]);
+  if (target) {
+    target.classList.add("active");
+    currentScreen = screenName;
+  }
 
   if (screenName === "history") renderHistory();
 }
@@ -135,9 +141,6 @@ function scanQRFrame() {
 
 async function handleScanResult(text) {
   const id = text.trim();
-  const scanStatus = document.getElementById("scan-status");
-  scanStatus.textContent = `Checking ${id} ...`;
-
   const extinguisher = await fetchExtinguisherById(id);
 
   if (!extinguisher) {
@@ -160,7 +163,7 @@ function stopQRScanner() {
 }
 
 /************************************************************
- * DETAIL
+ * DETAIL SCREEN
  ************************************************************/
 
 function showDetailScreen(ext) {
@@ -244,14 +247,15 @@ async function submitInspection() {
 }
 
 /************************************************************
- * RESULT
+ * RESULT SCREEN
  ************************************************************/
 
 function showResultScreen(result, inspector) {
-  document.getElementById("result-equipment-id").textContent =
-    currentEquipmentId;
+  document.getElementById("result-equipment-id").textContent = currentEquipmentId;
   document.getElementById("result-status").textContent = result;
   document.getElementById("result-inspector").textContent = inspector;
+  document.getElementById("result-timestamp").textContent =
+    new Date().toLocaleString();
 
   navigateToScreen("result");
 }
@@ -310,23 +314,88 @@ function updateStats() {
 })();
 
 /************************************************************
- * EVENT LISTENERS (Toggle Buttons)
+ * TOGGLE BUTTON HANDLER
  ************************************************************/
 
 document.querySelectorAll(".toggle-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    const q = btn.dataset.map; // ⭐ เปลี่ยนจาก question → map (ตรงกับ GAS)
+    const q = btn.dataset.question;
     const value = btn.dataset.value;
 
     document
-      .querySelectorAll(`.toggle-btn[data-map="${q}"]`)
+      .querySelectorAll(`.toggle-btn[data-question="${q}"]`)
       .forEach((b) =>
         b.classList.remove("active-yes", "active-no")
       );
 
     btn.classList.add(value === "yes" ? "active-yes" : "active-no");
 
-    inspectionData[q] = value;
+    inspectionData[
+      q === "pressure"
+        ? "pressure_ok"
+        : q === "damage"
+        ? "no_damage"
+        : q === "seal"
+        ? "seal_intact"
+        : q === "label"
+        ? "label_readable"
+        : q === "weight"
+        ? "weight_ok"
+        : q === "hose"
+        ? "hose_ok"
+        : "expiry_valid"
+    ] = value;
+
     updateSubmitButton();
   });
 });
+
+/************************************************************
+ * BOTTOM NAV
+ ************************************************************/
+
+document.querySelectorAll(".nav-item").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document
+      .querySelectorAll(".nav-item")
+      .forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const screen = btn.dataset.screen;
+    navigateToScreen(screen);
+  });
+});
+
+/************************************************************
+ * BUTTON EVENTS
+ ************************************************************/
+
+document.getElementById("scan-btn").addEventListener("click", openQRScanner);
+document.getElementById("stop-scan-btn").addEventListener("click", () => {
+  stopQRScanner();
+  navigateToScreen("home");
+});
+
+document
+  .getElementById("start-inspection-btn")
+  .addEventListener("click", startInspection);
+
+document
+  .getElementById("back-to-home-btn")
+  .addEventListener("click", () => navigateToScreen("home"));
+
+document
+  .getElementById("submit-inspection-btn")
+  .addEventListener("click", submitInspection);
+
+document
+  .getElementById("cancel-inspection-btn")
+  .addEventListener("click", () => navigateToScreen("detail"));
+
+document
+  .getElementById("new-inspection-btn")
+  .addEventListener("click", () => navigateToScreen("home"));
+
+document
+  .getElementById("view-history-btn")
+  .addEventListener("click", () => navigateToScreen("history"));

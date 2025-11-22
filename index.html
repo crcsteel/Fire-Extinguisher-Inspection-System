@@ -45,14 +45,19 @@
     <div id="home-screen" class="screen active">
       <div class="content">
         <div class="scan-hero">
-
-          <div class="scan-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
-            </svg>
-          </div>
-
+            <div style="
+                width:80px;
+                height:80px;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                color:#d32f2f;
+                font-size:68px;
+                margin: 0 auto;   /* <— บรรทัดนี้จัดกึ่งกลางแนวนอน */
+              "
+            >
+              <i class="fa-solid fa-fire-extinguisher"></i>
+            </div>
           <h2 style="margin:0 0 8px;font-size:22px;">พร้อมสำหรับการตรวจสอบ</h2>
           <p style="color:#64748b;margin:0 0 32px;">สแกนคิวอาร์โค้ดของถังดับเพลิงเพื่อเริ่มต้น</p>
 
@@ -305,6 +310,30 @@
     </button>
 </div>
 
+<!-- Profile Screen -->
+<div id="profile-screen" class="screen">
+  <div class="content">
+    <h2 style="margin-bottom:16px;">โปรไฟล์ผู้ใช้งาน</h2>
+
+    <div class="card">
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">ชื่อผู้ใช้งาน</span>
+          <span class="info-value">Guest User</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">เวอร์ชันระบบ</span>
+          <span class="info-value">v1.0</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" onclick="navigateToScreen('home')"
+      style="margin-top:24px;">
+      กลับหน้าแรก
+    </button>
+  </div>
+</div>
 
 
 

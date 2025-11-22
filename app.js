@@ -3,7 +3,7 @@
  ************************************************************/
 
 const API_BASE =
-  "https://script.google.com/macros/s/AKfycbyJdmffRh-Ip4Rs1UUWgV0nJLyF1hdRItaropGm6KMqyiKu_fUQh2BaRntV0w5JJF4/exec";
+  "https://script.google.com/macros/s/AKfycbxsQZGV1531rf0mXsO7gqpip1rPZRwrViUeGaRdSKANNtq2aQmhVlQgynBQF701Kx4/exec";
 
 let currentScreen = "home";
 let currentEquipmentId = null;
@@ -44,21 +44,18 @@ async function loadInspections() {
 }
 
 async function submitInspectionToServer(record) {
-  try {
-    const res = await fetch(API_BASE, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "submitInspection",
-        payload: record,
-      }),
-    });
-    return res.json();
-  } catch (err) {
-    console.error(err);
-    return { success: false };
-  }
+  const form = new URLSearchParams();
+  form.append("action", "submitInspection");
+  form.append("payload", JSON.stringify(record));
+
+  const res = await fetch(API_BASE, {
+    method: "POST",
+    body: form
+  });
+
+  return res.json();
 }
+
 
 /************************************************************
  * NAVIGATION
@@ -165,7 +162,6 @@ function stopQRScanner() {
 /************************************************************
  * DETAIL SCREEN
  ************************************************************/
-
 function showDetailScreen(ext) {
   document.getElementById("detail-equipment-id").textContent = ext.id;
   document.getElementById("detail-location").textContent = ext.location;
@@ -174,8 +170,18 @@ function showDetailScreen(ext) {
   document.getElementById("detail-last-inspection").textContent = ext.lastInspection;
   document.getElementById("detail-expiry").textContent = ext.expiryDate;
 
+  // ⭐ เพิ่มตรงนี้
+  const statusEl = document.getElementById("detail-status");
+  statusEl.textContent = ext.status || "-";
+
+  // เปลี่ยนสี badge ตามสถานะ
+  statusEl.className = "badge " +
+    (ext.status === "Good" ? "badge-good" :
+    ext.status === "Need Service" ? "badge-bad" : "badge-warning");
+
   navigateToScreen("detail");
 }
+
 
 /************************************************************
  * INSPECTION
@@ -217,18 +223,25 @@ async function submitInspection() {
   const inspectorName = document.getElementById("inspector-name").value.trim();
   const remarks = document.getElementById("remarks").value.trim();
 
-  const failCount =
-    Object.values(inspectionData).filter((v) => v === "no").length;
+  const failCount = Object.values(inspectionData)
+    .filter(v => v === "NO").length;
 
   const result = failCount === 0 ? "Pass" : "Fail";
 
   const record = {
     equipment_id: currentEquipmentId,
     inspector_name: inspectorName,
-    ...inspectionData,
-    remarks: remarks,
-    result: result,
+    pressure_ok: inspectionData.pressure_ok,
+    no_damage: inspectionData.no_damage,
+    seal_intact: inspectionData.seal_intact,
+    label_readable: inspectionData.label_readable,
+    weight_ok: inspectionData.weight_ok,
+    hose_ok: inspectionData.hose_ok,
+    expiry_valid: inspectionData.expiry_valid,
+    remarks,
+    result,
   };
+
 
   const res = await submitInspectionToServer(record);
 
@@ -322,35 +335,37 @@ function updateStats() {
 document.querySelectorAll(".toggle-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     const q = btn.dataset.question;
-    const value = btn.dataset.value;
+    let value = btn.dataset.value;
+
+    // แปลงเป็น YES/NO/NA เพื่อให้ตรงกับ Sheet
+    if (value === "yes") value = "YES";
+    if (value === "no") value = "NO";
+    if (value === "na") value = "NA";
 
     document
       .querySelectorAll(`.toggle-btn[data-question="${q}"]`)
-      .forEach((b) =>
-        b.classList.remove("active-yes", "active-no")
-      );
+      .forEach((b) => b.classList.remove("active-yes", "active-no"));
 
-    btn.classList.add(value === "yes" ? "active-yes" : "active-no");
+    btn.classList.add(
+      value === "YES" ? "active-yes" : value === "NO" ? "active-no" : ""
+    );
 
-    inspectionData[
-      q === "pressure"
-        ? "pressure_ok"
-        : q === "damage"
-        ? "no_damage"
-        : q === "seal"
-        ? "seal_intact"
-        : q === "label"
-        ? "label_readable"
-        : q === "weight"
-        ? "weight_ok"
-        : q === "hose"
-        ? "hose_ok"
-        : "expiry_valid"
-    ] = value;
+    const map = {
+      pressure: "pressure_ok",
+      damage: "no_damage",
+      seal: "seal_intact",
+      label: "label_readable",
+      weight: "weight_ok",
+      hose: "hose_ok",
+      expiry: "expiry_valid"
+    };
 
+
+    inspectionData[map[q]] = value;
     updateSubmitButton();
   });
 });
+
 
 /************************************************************
  * BOTTOM NAV
@@ -401,3 +416,18 @@ document
 document
   .getElementById("view-history-btn")
   .addEventListener("click", () => navigateToScreen("history"));
+
+  async function selectExtinguisher(id) {
+  // โหลดข้อมูลจาก API (เหมือนสแกน)
+  const extinguisher = await fetchExtinguisherById(id);
+
+  if (!extinguisher) {
+    alert("ID not found: " + id);
+    return;
+  }
+
+  currentExtinguisher = extinguisher;
+  currentEquipmentId = extinguisher.id;
+
+  showDetailScreen(extinguisher);
+}

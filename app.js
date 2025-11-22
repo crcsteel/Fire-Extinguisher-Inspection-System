@@ -15,6 +15,38 @@ let videoStream = null;
 /************************************************************
  * API HELPERS
  ************************************************************/
+function formatDateTH(dateStr) {
+  if (!dateStr) return "—";
+
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
+
+function showExtLoading() {
+  const box = document.getElementById("ext-list");
+  const empty = document.getElementById("ext-empty");
+
+  empty.style.display = "none";
+
+  
+  box.innerHTML = `
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  `;
+}
 
 async function fetchExtinguisherById(id) {
   try {
@@ -73,7 +105,8 @@ function navigateToScreen(screenName) {
     inspection: "inspection-screen",
     result: "result-screen",
     history: "history-screen",
-    profile: "profile-screen"
+    profile: "profile-screen",
+    "all-ext": "all-ext-screen"   // ✅ แบบนี้ใช้ได้
   };
 
   const target = document.getElementById(screenMap[screenName]);
@@ -276,7 +309,6 @@ function showResultScreen(result, inspector) {
 /************************************************************
  * HISTORY
  ************************************************************/
-
 function renderHistory() {
   const container = document.getElementById("history-list");
 
@@ -287,18 +319,39 @@ function renderHistory() {
 
   container.innerHTML = allInspections
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-    .map(
-      (i) => `
-      <div class="history-item">
-        <div><b>${i.equipment_id}</b> — ${i.result}</div>
-        <div>${i.inspector_name}</div>
-        <div>${new Date(i.timestamp).toLocaleString()}</div>
-      </div>
-    `
-    )
+    .map((i) => {
+      
+      // Map ผลลัพธ์เป็นสีแบบเดียวกับ status
+      let statusClass = "status-badge";
+      if (i.result === "Pass") statusClass += " status-good";
+      else if (i.result === "Fail") statusClass += " status-bad";
+      else statusClass += " status-warn";
+
+      return `
+        <div class="history-item">
+
+          <!-- Header: ID + ผลลัพธ์ -->
+          <div class="history-header" 
+               style="display:flex; align-items:center; gap:20px;">
+            
+            <span class="history-id">${i.equipment_id}</span>
+            <span class="history-date">${i.inspector_name}</span>
+
+            <span class="${statusClass}" style="margin-left:auto;">
+              ${i.result}
+            </span>
+          </div>
+
+          <!-- วันที่ตรวจ -->
+          <div class="history-inspector" style="margin-top:4px;">
+            ตรวจวันที่: ${formatDateTH(i.timestamp)}
+          </div>
+
+        </div>
+      `;
+    })
     .join("");
 }
-
 
 /************************************************************
  * STATS
@@ -373,15 +426,17 @@ document.querySelectorAll(".toggle-btn").forEach((btn) => {
 
 document.querySelectorAll(".nav-item").forEach((btn) => {
   btn.addEventListener("click", () => {
-    document
-      .querySelectorAll(".nav-item")
+    document.querySelectorAll(".nav-item")
       .forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
 
     const screen = btn.dataset.screen;
     navigateToScreen(screen);
+
+    if (screen === "all-ext") loadAllExtinguishers();
   });
 });
+
 
 /************************************************************
  * BUTTON EVENTS
@@ -430,4 +485,71 @@ document
   currentEquipmentId = extinguisher.id;
 
   showDetailScreen(extinguisher);
+}
+
+function renderExtinguisherList(list) {
+  const box = document.getElementById("ext-list");
+  const empty = document.getElementById("ext-empty");
+
+  if (!list || list.length === 0) {
+    box.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+
+  empty.style.display = "none";
+
+  box.innerHTML = list
+    .map((e) => {
+      let statusClass = "status-badge";
+
+      if (e.status === "Good") statusClass += " status-good";
+      else if (e.status === "Need Service") statusClass += " status-bad";
+      else statusClass += " status-warn";
+
+      return `
+        <div class="history-item" onclick="selectExtinguisher('${e.id}')">
+
+          <div class="history-header" style="display:flex; align-items:center; gap:20px;">
+            <span class="history-id">${e.id}</span>
+            <span class="history-date">${e.type}</span>
+
+            <span class="${statusClass}" style="margin-left:auto;">
+              ${e.status}
+            </span>
+          </div>
+
+          <div class="history-inspector">${e.location}</div>
+
+          <!-- ⭐ แปลงวันที่ ISO → ไทย -->
+          <div class="history-date-small" style="font-size:12px; color:#6b7280; margin-top:16px;">
+            ตรวจล่าสุด: ${formatDateTH(e.lastInspection)}
+          </div>
+
+        </div>
+      `;
+    })
+    .join("");
+}
+
+
+/************************************************************
+ * LOAD ALL EXTINGUISHERS (NEW)
+ ************************************************************/
+async function loadAllExtinguishers() {
+  showExtLoading(); // ← แสดงโหลดก่อน
+
+  try {
+    const res = await fetch(`${API_BASE}?action=getExtinguishers`);
+    const data = await res.json();
+
+    if (!data.success) {
+      console.error("API Error:", data.message);
+      return;
+    }
+
+    renderExtinguisherList(data.extinguishers);
+  } catch (err) {
+    console.error("Load Extinguishers Error:", err);
+  }
 }

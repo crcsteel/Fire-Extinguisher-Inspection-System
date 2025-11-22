@@ -27,13 +27,13 @@
       <!-- โลโก้ด้านซ้าย -->
       <img src="logo-crc.png" 
            alt="Company Logo" 
-           style="height:64px; width:auto;">
+           style="height:48px; width:auto;">
 
       <!-- กล่องข้อความด้านขวา -->
       <div style="display:flex; flex-direction:column;">
-          <h1 id="app-title" style="margin:0; font-size:20px; font-weight:600;">
+          <h3 id="app-title" style="margin:0; font-size:20px; font-weight:600;">
               ระบบตรวจสอบถังดับเพลิง
-          </h1>
+          </h3>
           <p id="company-name" style="margin:0; font-size:14px; opacity:0.9;">
               พร้อมใช้งานเพื่อความปลอดภัย
           </p>
@@ -152,7 +152,6 @@
           <div class="toggle-group">
             <button class="toggle-btn" data-question="pressure" data-value="yes">✓ ใช่</button>
             <button class="toggle-btn" data-question="pressure" data-value="no">✗ ไม่ใช่</button>
-            <button class="toggle-btn" data-question="pressure" data-value="na">− ไม่เกี่ยวข้อง</button>
           </div>
         </div>
 
@@ -161,7 +160,6 @@
           <div class="toggle-group">
             <button class="toggle-btn" data-question="damage" data-value="yes">✓ ใช่</button>
             <button class="toggle-btn" data-question="damage" data-value="no">✗ ไม่ใช่</button>
-            <button class="toggle-btn" data-question="damage" data-value="na">− ไม่เกี่ยวข้อง</button>
           </div>
         </div>
 
@@ -170,7 +168,6 @@
           <div class="toggle-group">
             <button class="toggle-btn" data-question="seal" data-value="yes">✓ ใช่</button>
             <button class="toggle-btn" data-question="seal" data-value="no">✗ ไม่ใช่</button>
-            <button class="toggle-btn" data-question="seal" data-value="na">− ไม่เกี่ยวข้อง</button>
           </div>
         </div>
 
@@ -179,7 +176,6 @@
           <div class="toggle-group">
             <button class="toggle-btn" data-question="label" data-value="yes">✓ ใช่</button>
             <button class="toggle-btn" data-question="label" data-value="no">✗ ไม่ใช่</button>
-            <button class="toggle-btn" data-question="label" data-value="na">− ไม่เกี่ยวข้อง</button>
           </div>
         </div>
 
@@ -188,7 +184,6 @@
           <div class="toggle-group">
             <button class="toggle-btn" data-question="weight" data-value="yes">✓ ใช่</button>
             <button class="toggle-btn" data-question="weight" data-value="no">✗ ไม่ใช่</button>
-            <button class="toggle-btn" data-question="weight" data-value="na">− ไม่เกี่ยวข้อง</button>
           </div>
         </div>
 
@@ -197,7 +192,6 @@
           <div class="toggle-group">
             <button class="toggle-btn" data-question="hose" data-value="yes">✓ ใช่</button>
             <button class="toggle-btn" data-question="hose" data-value="no">✗ ไม่ใช่</button>
-            <button class="toggle-btn" data-question="hose" data-value="na">− ไม่เกี่ยวข้อง</button>
           </div>
         </div>
 
@@ -206,7 +200,6 @@
           <div class="toggle-group">
             <button class="toggle-btn" data-question="expiry" data-value="yes">✓ ใช่</button>
             <button class="toggle-btn" data-question="expiry" data-value="no">✗ ไม่ใช่</button>
-            <button class="toggle-btn" data-question="expiry" data-value="na">− ไม่เกี่ยวข้อง</button>
           </div>
         </div>
 
@@ -296,6 +289,11 @@
         <div>หน้าแรก</div>
     </button>
 
+    <button class="nav-item" data-screen="all-ext">
+        <i class="fa-solid fa-fire-extinguisher"></i>
+        <div>อุปกรณ์</div>
+    </button>
+
     <button class="nav-item" data-screen="scan">
         <i class="fa-solid fa-qrcode"></i>
         <div>สแกน</div>
@@ -342,6 +340,20 @@
   </div>
 </div>
 
+<!-- All Extinguishers Screen -->
+<div id="all-ext-screen" class="screen">
+  <div class="content">
+    <h2 style="margin:0 0 20px;font-size:20px;font-weight:700;">
+      รายการถังดับเพลิงทั้งหมด
+    </h2>
+
+    <div id="ext-list"></div>
+
+    <div id="ext-empty" class="loading" style="display:none;">
+      <p>ไม่พบข้อมูลถังดับเพลิง</p>
+    </div>
+  </div>
+</div>
 
 
   </div>

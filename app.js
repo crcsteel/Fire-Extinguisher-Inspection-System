@@ -267,16 +267,13 @@ function showResultScreen(result, inspector) {
 function renderHistory() {
   const container = document.getElementById("history-list");
 
-  if (allInspections.length === 0) {
+  if (!allInspections || allInspections.length === 0) {
     container.innerHTML = "<div>No inspections yet</div>";
     return;
   }
 
   container.innerHTML = allInspections
-    .sort(
-      (a, b) =>
-        new Date(b.inspection_date) - new Date(a.inspection_date)
-    )
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
     .map(
       (i) => `
       <div class="history-item">
@@ -288,6 +285,7 @@ function renderHistory() {
     )
     .join("");
 }
+
 
 /************************************************************
  * STATS
@@ -311,7 +309,11 @@ function updateStats() {
 
 (async function init() {
   await loadInspections();
+  // เริ่มต้นที่หน้า home
+  navigateToScreen("home");
 })();
+
+
 
 /************************************************************
  * TOGGLE BUTTON HANDLER

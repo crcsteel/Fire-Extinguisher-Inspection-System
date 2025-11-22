@@ -239,7 +239,7 @@ async function submitInspection() {
 
   allInspections.push({
     ...record,
-    inspection_date: new Date().toISOString(),
+    timestamp: new Date().toISOString(),
   });
 
   updateStats();
@@ -282,7 +282,7 @@ function renderHistory() {
       <div class="history-item">
         <div><b>${i.equipment_id}</b> — ${i.result}</div>
         <div>${i.inspector_name}</div>
-        <div>${new Date(i.inspection_date).toLocaleString()}</div>
+        <div>${new Date(i.timestamp).toLocaleString()}</div>
       </div>
     `
     )
@@ -297,7 +297,7 @@ function updateStats() {
   const today = new Date().toDateString();
   const todayCount = allInspections.filter(
     (i) =>
-      new Date(i.inspection_date).toDateString() === today
+      new Date(i.timestamp).toDateString() === today
   ).length;
 
   document.getElementById("today-count").textContent = todayCount;

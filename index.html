@@ -2,14 +2,16 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport"
+      content="width=device-width, initial-scale=1.0,
+               maximum-scale=1.0, user-scalable=no">
   <title>Fire Extinguisher Inspection System</title>
   <link href="https://fonts.googleapis.com/css2?family=K2D:wght@300;400;500;600;700&display=swap" rel="stylesheet"> 
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body ontouchstart="">
   <div class="app-container">
 
     <!-- Header -->
@@ -308,10 +310,6 @@
         <i class="fa-solid fa-user"></i>
         <div>โปรไฟล์</div>
     </button>
-    <button class="manual-btn" onclick="selectExtinguisher('FE-B-205')">
-      เทส
-    </button>
-
 </div>
 
 <!-- Profile Screen -->
@@ -335,6 +333,11 @@
     <button class="btn btn-secondary" onclick="navigateToScreen('home')"
       style="margin-top:24px;">
       กลับหน้าแรก
+    </button>
+
+    <button class="btn btn-secondary" onclick="selectExtinguisher('FE-B-205')"
+      style="margin-top:24px;">
+      เทส
     </button>
   </div>
 </div>

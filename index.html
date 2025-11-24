@@ -19,9 +19,9 @@
   <div style="
       display:flex;
       flex-direction:row !important;
-      align-items:center;
-      justify-content:center;
-      gap:16px;
+      align-items:left;
+      justify-content:left;
+      gap:30px;
     ">
 
       <!-- โลโก้ด้านซ้าย -->
@@ -42,46 +42,85 @@
   </div>
 </div>
 
+<!-- Home Screen -->
+<div id="home-screen" class="screen active">
+  <div class="content">
 
-    <!-- Home Screen -->
-    <div id="home-screen" class="screen active">
-      <div class="content">
-        <div class="scan-hero">
-            <div style="
-                width:80px;
-                height:80px;
-                display:flex;
-                justify-content:center;
-                align-items:center;
-                color:#d32f2f;
-                font-size:68px;
-                margin: 0 auto;   /* <— บรรทัดนี้จัดกึ่งกลางแนวนอน */
-              "
-            >
-              <i class="fa-solid fa-fire-extinguisher"></i>
-            </div>
-          <h2 style="margin:0 0 8px;font-size:22px;">พร้อมสำหรับการตรวจสอบ</h2>
-          <p style="color:#64748b;margin:0 0 32px;">สแกนคิวอาร์โค้ดของถังดับเพลิงเพื่อเริ่มต้น</p>
+    <!-- Hero -->
+    <div class="scan-hero">
+      <h2 style="margin:12px 0 6px; font-size:22px; font-weight:700;">
+        สรุปผลการตรวจสอบ
+      </h2>
 
-          <button id="scan-btn" class="scan-button">
-            <span id="scan-button-text">🔍 สแกนคิวอาร์โค้ด</span>
-          </button>
+      <p style="color:#64748b; margin:0 0 10px;">
+        สแกนคิวอาร์โค้ดของถังเพื่อเริ่มต้น
+      </p>
 
-        </div>
+    </div>
 
-        <div class="quick-stats">
-          <div class="stat-card">
-            <p class="stat-value" id="today-count">0</p>
-            <p class="stat-label">วันนี้</p>
-          </div>
-          <div class="stat-card">
-            <p class="stat-value" id="total-count">0</p>
-            <p class="stat-label">ทั้งหมด</p>
-          </div>
-        </div>
+    <div class="summary-grid">
 
+      <div class="summary-card">
+        <div class="summary-title">วันนี้</div>
+        <div class="summary-value" id="sum-today">0</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-title">สัปดาห์นี้</div>
+        <div class="summary-value" id="sum-week">0</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-title">เดือนนี้</div>
+        <div class="summary-value" id="sum-month">0</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-title">ทั้งหมด</div>
+        <div class="summary-value" id="sum-total">0</div>
+      </div>
+
+    </div>
+
+    <!-- CHECKED / UNCHECKED -->
+    <h3 class="section-title">สถานะถังดับเพลิง</h3>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-title">ตรวจแล้ว</div>
+        <div class="summary-value" id="sum-checked">0</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-title">ยังไม่ตรวจ</div>
+        <div class="summary-value" id="sum-unchecked">0</div>
       </div>
     </div>
+
+    <!-- ALERTS -->
+    <h3 class="section-title">การแจ้งเตือน</h3>
+
+    <!-- 1 เดือน -->
+    <div class="alert-box alert-warn">
+      <div class="alert-header">
+        <i class="fa-solid fa-circle-exclamation blink"></i>
+        <span>ควรตรวจสอบ (เกิน 1 เดือน)</span>
+      </div>
+      <div id="alert-1m" class="alert-list"></div>
+    </div>
+
+    <!-- 6 เดือน -->
+    <div class="alert-box alert-danger">
+      <div class="alert-header">
+        <i class="fa-solid fa-triangle-exclamation blink-warn"></i>
+        <span>ต้องตรวจทันที (เกิน 6 เดือน)</span>
+      </div>
+      <div id="alert-6m" class="alert-list"></div>
+    </div>
+
+  </div>
+</div>
+
 
     <!-- Detail Screen -->
     <div id="detail-screen" class="screen">
@@ -94,11 +133,11 @@
           </div>
 
           <div style="text-align:center;margin:24px 0;">
-            <div style="width:80px;height:80px;margin:0 auto;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);border-radius:16px;display:flex;align-items:center;justify-content:center;">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 10 12 6.16-1.26 10-6.45 10-12V7l-10-5z" />
-                <path d="M12 8v4m0 4h.01" />
-              </svg>
+            <div id="ext-image-box"
+                style="width:80px;height:80px;margin:0 auto;background:#f3f3f3;border-radius:16px;display:flex;align-items:center;justify-content:center;">
+                <img id="detail-image"
+                    src=""
+                    style="width:100%;height:100%;object-fit:contain;border-radius:16px;display:none;">
             </div>
           </div>
 
@@ -120,7 +159,7 @@
               <span class="info-value" id="detail-last-inspection">-</span>
             </div>
             <div class="info-row">
-              <span class="info-label">วันหมดอายุ</span>
+              <span class="info-label">คุณสมบัติ</span>
               <span class="info-value" id="detail-expiry">-</span>
             </div>
           </div>
@@ -132,90 +171,70 @@
       </div>
     </div>
 
-    <!-- Inspection Screen -->
-    <div id="inspection-screen" class="screen">
-      <div class="content">
+<!-- Inspection Screen -->
+<div id="inspection-screen" class="screen">
+  <div class="content">
 
-        <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;">รายการตรวจสอบความปลอดภัย</h2>
-        <p style="color:#64748b;margin:0 0 24px;font-size:14px;">
-          ถังดับเพลิง: <span id="inspection-equipment-id">-</span>
-        </p>
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:700;">รายการตรวจสอบความปลอดภัย</h2>
+    <p style="color:#64748b;margin:0 0 24px;font-size:14px;">
+      ถังดับเพลิง: <span id="inspection-equipment-id">-</span>
+    </p>
 
-        <div class="form-group">
-          <label class="form-label" for="inspector-name">ชื่อผู้ตรวจสอบ</label>
-          <input type="text" id="inspector-name" class="form-input" placeholder="ระบุชื่อผู้ตรวจสอบ" />
-        </div>
+    <div class="form-group">
+      <label class="form-label" for="inspector-name">ชื่อผู้ตรวจสอบ</label>
+      <input type="text" id="inspector-name" class="form-input" placeholder="ระบุชื่อผู้ตรวจสอบ" />
+    </div>
 
-        <!-- Checklist -->
-        <div class="checklist-item">
-          <div class="checklist-question">1. แรงดันอยู่ในระดับปกติหรือไม่?</div>
-          <div class="toggle-group">
-            <button class="toggle-btn" data-question="pressure" data-value="yes">✓ ใช่</button>
-            <button class="toggle-btn" data-question="pressure" data-value="no">✗ ไม่ใช่</button>
-          </div>
-        </div>
-
-        <div class="checklist-item">
-          <div class="checklist-question">2. ไม่มีความเสียหายหรือสนิมใช่หรือไม่?</div>
-          <div class="toggle-group">
-            <button class="toggle-btn" data-question="damage" data-value="yes">✓ ใช่</button>
-            <button class="toggle-btn" data-question="damage" data-value="no">✗ ไม่ใช่</button>
-          </div>
-        </div>
-
-        <div class="checklist-item">
-          <div class="checklist-question">3. สลักและซีลอยู่ในสภาพสมบูรณ์หรือไม่?</div>
-          <div class="toggle-group">
-            <button class="toggle-btn" data-question="seal" data-value="yes">✓ ใช่</button>
-            <button class="toggle-btn" data-question="seal" data-value="no">✗ ไม่ใช่</button>
-          </div>
-        </div>
-
-        <div class="checklist-item">
-          <div class="checklist-question">4. ฉลากอยู่ในสภาพที่อ่านได้หรือไม่?</div>
-          <div class="toggle-group">
-            <button class="toggle-btn" data-question="label" data-value="yes">✓ ใช่</button>
-            <button class="toggle-btn" data-question="label" data-value="no">✗ ไม่ใช่</button>
-          </div>
-        </div>
-
-        <div class="checklist-item">
-          <div class="checklist-question">5. น้ำหนักอยู่ในเกณฑ์มาตรฐานหรือไม่?</div>
-          <div class="toggle-group">
-            <button class="toggle-btn" data-question="weight" data-value="yes">✓ ใช่</button>
-            <button class="toggle-btn" data-question="weight" data-value="no">✗ ไม่ใช่</button>
-          </div>
-        </div>
-
-        <div class="checklist-item">
-          <div class="checklist-question">6. สายฉีดอยู่ในสภาพดีหรือไม่?</div>
-          <div class="toggle-group">
-            <button class="toggle-btn" data-question="hose" data-value="yes">✓ ใช่</button>
-            <button class="toggle-btn" data-question="hose" data-value="no">✗ ไม่ใช่</button>
-          </div>
-        </div>
-
-        <div class="checklist-item">
-          <div class="checklist-question">7. วันหมดอายุยังไม่ถึงใช่หรือไม่?</div>
-          <div class="toggle-group">
-            <button class="toggle-btn" data-question="expiry" data-value="yes">✓ ใช่</button>
-            <button class="toggle-btn" data-question="expiry" data-value="no">✗ ไม่ใช่</button>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="remarks">บันทึกเพิ่มเติม</label>
-          <textarea id="remarks" class="form-input" placeholder="กรอกข้อมูลเพิ่มเติม (ถ้ามี)"></textarea>
-        </div>
-
-        <button id="submit-inspection-btn" class="btn btn-success" disabled>
-          <span id="submit-btn-text">บันทึกผลการตรวจสอบ</span>
-        </button>
-
-        <button id="cancel-inspection-btn" class="btn btn-secondary">ยกเลิก</button>
-
+    <!-- 1 -->
+    <div class="checklist-item">
+      <div class="checklist-question">1. แรงดันอยู่ในระดับปกติหรือไม่?</div>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-question="pressure" data-value="yes">✓ ใช่</button>
+        <button class="toggle-btn" data-question="pressure" data-value="no">✗ ไม่ใช่</button>
       </div>
     </div>
+
+    <!-- 2 -->
+    <div class="checklist-item">
+      <div class="checklist-question">2. สลักและซีลอยู่ในสภาพสมบูรณ์หรือไม่?</div>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-question="seal" data-value="yes">✓ ใช่</button>
+        <button class="toggle-btn" data-question="seal" data-value="no">✗ ไม่ใช่</button>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="checklist-item">
+      <div class="checklist-question">3. สายฉีดอยู่ในสภาพดีหรือไม่?</div>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-question="hose" data-value="yes">✓ ใช่</button>
+        <button class="toggle-btn" data-question="hose" data-value="no">✗ ไม่ใช่</button>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="checklist-item">
+      <div class="checklist-question">4. ถังอยู่ในสภาพดีหรือไม่?</div>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-question="expiry" data-value="yes">✓ ใช่</button>
+        <button class="toggle-btn" data-question="expiry" data-value="no">✗ ไม่ใช่</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="remarks">บันทึกเพิ่มเติม</label>
+      <textarea id="remarks" class="form-input" placeholder="กรอกข้อมูลเพิ่มเติม (ถ้ามี)"></textarea>
+    </div>
+
+    <button id="submit-inspection-btn" class="btn btn-success" disabled>
+      <span id="submit-btn-text">บันทึกผลการตรวจสอบ</span>
+    </button>
+
+    <button id="cancel-inspection-btn" class="btn btn-secondary">ยกเลิก</button>
+
+  </div>
+</div>
+
 
     <!-- Result Screen -->
     <div id="result-screen" class="screen">
@@ -268,20 +287,24 @@
     </div>
 
     <!-- Scan Screen -->
-    <div id="scan-screen" class="screen">
-      <div class="content">
-        <h2 style="margin-bottom:16px;">สแกนคิวอาร์โค้ด</h2>
+<div id="scan-screen" class="screen">
+  <div class="content">
+    <h2 style="margin-bottom:16px;">สแกนคิวอาร์โค้ด</h2>
 
-        <video id="qr-video" style="width:100%;border-radius:12px;background:#000;"></video>
+    <video id="qr-video"
+           style="width:100%;border-radius:12px;background:#000;">
+    </video>
 
-        <p id="scan-status" style="text-align:center;margin-top:12px;color:#64748b;">
-          กรุณานำกล้องไปยังคิวอาร์โค้ด...
-        </p>
+    <p id="scan-status"
+       style="text-align:center;margin-top:12px;color:#64748b;">
+       กรุณานำกล้องไปยังคิวอาร์โค้ด...
+    </p>
 
-        <button id="stop-scan-btn" class="btn btn-secondary" style="margin-top:16px;">ยกเลิก</button>
+    <button id="stop-scan-btn" class="btn btn-secondary" onclick="navigateToScreen('home')"
+            style="margin-top:16px;">ยกเลิก</button>
 
-      </div>
-    </div>
+  </div>
+</div>
 
 <div class="bottom-nav">
     <button class="nav-item active" data-screen="home">
@@ -310,35 +333,121 @@
     </button>
 </div>
 
-<!-- Profile Screen -->
+<!-- ===================== Profile Screen ===================== -->
 <div id="profile-screen" class="screen">
   <div class="content">
-    <h2 style="margin-bottom:16px;">โปรไฟล์ผู้ใช้งาน</h2>
 
-    <div class="card">
+    <div style="text-align:center; margin:10px 0 20px;">
+      <div style="
+          width:90px;
+          height:90px;
+          margin:0 auto 12px;
+          border-radius:50%;
+          background:linear-gradient(135deg,#ef4444,#dc2626);
+          display:flex;align-items:center;justify-content:center;
+          box-shadow:0 4px 15px rgba(0,0,0,0.2);
+      ">
+        <i class="fa-solid fa-user" style="font-size:42px;color:white;"></i>
+      </div>
+
+      <h2 style="margin:0;font-size:22px;font-weight:700;">โปรไฟล์ผู้ใช้งาน</h2>
+      <p style="margin:4px 0 0;color:#64748b;">ข้อมูลทั่วไปของระบบ</p>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="card" style="margin-bottom:20px;">
       <div class="info-grid">
+
         <div class="info-row">
           <span class="info-label">ชื่อผู้ใช้งาน</span>
-          <span class="info-value">Guest User</span>
+          <span class="info-value" id="profile-username">Guest User</span>
         </div>
+
+        <div class="info-row">
+          <span class="info-label">สิทธิ์ผู้ใช้</span>
+          <span class="info-value">ทั่วไป</span>
+        </div>
+
         <div class="info-row">
           <span class="info-label">เวอร์ชันระบบ</span>
           <span class="info-value">v1.0</span>
         </div>
+
+        <div class="info-row">
+          <span class="info-label">วันที่ใช้งาน</span>
+          <span class="info-value" id="profile-date">
+          </span>
+        </div>
+
       </div>
     </div>
 
-    <button class="btn btn-secondary" onclick="navigateToScreen('home')"
+    <!-- Developer Card -->
+    <div class="card" style="border-left:5px solid #ef4444; padding:20px;">
+
+      <!-- Developer Header -->
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <i class="fa-solid fa-code" 
+          style="font-size:18px; color:#ef4444;"></i>
+        <h3 style="margin:0; font-size:18px; font-weight:600;">
+          ผู้พัฒนาระบบ
+        </h3>
+      </div>
+
+      <div class="info-grid" style="margin-bottom:18px;">
+        <div class="info-row">
+          <span class="info-label">ชื่อ</span>
+          <span class="info-value">จิรายุส แก่นอินทร์</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">ตำแหน่ง</span>
+          <span class="info-value">Planning and Data Analysis</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">planning@crcsteel.co.th</span>
+        </div>
+      </div>
+
+      <!-- Manager Header -->
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <i class="fa-solid fa-user-shield" 
+          style="font-size:18px; color:#dc2626;"></i>
+        <h3 style="margin:0; font-size:18px; font-weight:600;">
+          ผู้ดูแลข้อมูลความปลอดภัย
+        </h3>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">ชื่อ</span>
+          <span class="info-value">สุนารี สิมุฒิ</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">ตำแหน่ง</span>
+          <span class="info-value">Professional Safety Officer</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">sunaree21122534@gmail.com</span>
+        </div>
+      </div>
+
+    </div>
+
+
+    <button class="btn btn-secondary" onclick="navigateToScreen('home')" 
       style="margin-top:24px;">
       กลับหน้าแรก
     </button>
 
-    <button class="btn btn-secondary" onclick="selectExtinguisher('FE-B-205')"
-      style="margin-top:24px;">
-      เทส
-    </button>
   </div>
 </div>
+
 
 <!-- All Extinguishers Screen -->
 <div id="all-ext-screen" class="screen">
@@ -356,9 +465,69 @@
 </div>
 
 
+</div>
+<!-- ==================== GLOBAL LOADING OVERLAY ==================== -->
+<div id="loading-overlay">
+  <div class="loading-box">
+    <div class="loader"></div>
+    <div id="loading-text">กำลังโหลดข้อมูล...</div>
   </div>
+</div>
 
-<script src="app.js"></script>
+<script src="app.js?v=3"></script>
 
+<script>
+// ================= DISPLAY CURRENT DATE IN PROFILE =================
+(function () {
+  const d = new Date();
+
+  const dateStr =
+    d.getDate().toString().padStart(2, "0") +
+    "/" +
+    (d.getMonth() + 1).toString().padStart(2, "0") +
+    "/" +
+    d.getFullYear();
+
+  const el = document.getElementById("profile-date");
+  if (el) el.textContent = dateStr;
+})();
+
+// เก็บสถานะคำตอบ
+const inspectionData = {
+  pressure: null,
+  seal: null,
+  hose: null,
+  expiry: null
+};
+
+// ปุ่ม submit
+const submitBtn = document.getElementById("submit-inspection-btn");
+
+// ฟังก์ชันเช็คว่าตอบครบหรือยัง
+function checkAllAnswered() {
+  const allAnswered = Object.values(inspectionData).every(v => v !== null);
+  submitBtn.disabled = !allAnswered;
+}
+
+// ดักการกดปุ่ม toggle
+document.querySelectorAll(".toggle-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const question = btn.dataset.question;
+    const value = btn.dataset.value;
+
+    // บันทึกข้อมูลของข้อที่ตอบ
+    inspectionData[question] = value;
+
+    // เปลี่ยนสีปุ่มที่เลือก
+    const group = btn.parentElement;
+    group.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    // เช็คว่าตอบครบหรือยัง
+    checkAllAnswered();
+  });
+});
+
+</script>
 </body>
 </html>

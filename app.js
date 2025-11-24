@@ -3,7 +3,7 @@
  ************************************************************/
 
 const API_BASE =
-  "https://script.google.com/macros/s/AKfycbxsQZGV1531rf0mXsO7gqpip1rPZRwrViUeGaRdSKANNtq2aQmhVlQgynBQF701Kx4/exec";
+  "https://script.google.com/macros/s/AKfycbzwDTU7fq_XRts-l0MOOBUZLye8MwiRysNkjEV8EceGDyLX5ZpyoJertS98Kq3YhixYDA/exec";
 
 let currentScreen = "home";
 let currentEquipmentId = null;
@@ -11,31 +11,40 @@ let currentExtinguisher = null;
 let inspectionData = {};
 let allInspections = [];
 let videoStream = null;
+let extinguisherList = [];
 
 /************************************************************
- * API HELPERS
+ * HELPERS
  ************************************************************/
 function formatDateTH(dateStr) {
   if (!dateStr) return "—";
-
   const d = new Date(dateStr);
   if (isNaN(d)) return dateStr;
 
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
+  return `${String(d.getDate()).padStart(2, "0")}/${String(
+    d.getMonth() + 1
+  ).padStart(2, "0")}/${d.getFullYear()}`;
+}
 
-  return `${day}/${month}/${year}`;
+function parseDateSafe(str) {
+  if (!str) return null;
+  if (str.includes("/")) {
+    const [d, m, y] = str.split("/");
+    return new Date(`${y}-${m}-${d}`);
+  }
+  if (!isNaN(new Date(str))) return new Date(str);
+  return null;
+}
+
+function safeSet(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
 }
 
 function showExtLoading() {
-  const box = document.getElementById("ext-list");
-  const empty = document.getElementById("ext-empty");
+  document.getElementById("ext-empty").style.display = "none";
 
-  empty.style.display = "none";
-
-  
-  box.innerHTML = `
+  document.getElementById("ext-list").innerHTML = `
     <div class="skeleton-card"></div>
     <div class="skeleton-card"></div>
     <div class="skeleton-card"></div>
@@ -45,17 +54,19 @@ function showExtLoading() {
     <div class="skeleton-card"></div>
     <div class="skeleton-card"></div>
     <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    
   `;
 }
 
+/************************************************************
+ * LOAD API
+ ************************************************************/
 async function fetchExtinguisherById(id) {
   try {
-    const res = await fetch(
-      `${API_BASE}?action=getExtinguisher&id=${encodeURIComponent(id)}`
-    );
+    const res = await fetch(`${API_BASE}?action=getExtinguisher&id=${id}`);
     const data = await res.json();
-    if (!data.success) return null;
-    return data.extinguisher;
+    return data.success ? data.extinguisher : null;
   } catch (err) {
     console.error(err);
     return null;
@@ -66,33 +77,34 @@ async function loadInspections() {
   try {
     const res = await fetch(`${API_BASE}?action=getInspections`);
     const data = await res.json();
+
     if (data.success) {
-      allInspections = data.inspections || [];
-      updateStats();
+      allInspections = data.inspections;
     }
   } catch (err) {
-    console.error(err);
+    console.error("Inspection Load Error:", err);
   }
 }
 
-async function submitInspectionToServer(record) {
-  const form = new URLSearchParams();
-  form.append("action", "submitInspection");
-  form.append("payload", JSON.stringify(record));
+async function loadAllExtinguishers() {
+  showLoading("กำลังโหลดข้อมูลถังดับเพลิง...");
+  try {
+    const res = await fetch(`${API_BASE}?action=getExtinguishers`);
+    const data = await res.json();
 
-  const res = await fetch(API_BASE, {
-    method: "POST",
-    body: form
-  });
-
-  return res.json();
+    if (data.success) {
+      extinguisherList = data.extinguishers;
+      renderExtinguisherList(extinguisherList);
+    }
+  } catch (err) {
+    console.error("Load Extinguishers Error:", err);
+  }
+  hideLoading();
 }
 
-
 /************************************************************
- * NAVIGATION
+ * SCREENS
  ************************************************************/
-
 function navigateToScreen(screenName) {
   document.querySelectorAll(".screen").forEach((s) =>
     s.classList.remove("active")
@@ -106,7 +118,7 @@ function navigateToScreen(screenName) {
     result: "result-screen",
     history: "history-screen",
     profile: "profile-screen",
-    "all-ext": "all-ext-screen"   // ✅ แบบนี้ใช้ได้
+    "all-ext": "all-ext-screen",
   };
 
   const target = document.getElementById(screenMap[screenName]);
@@ -121,7 +133,6 @@ function navigateToScreen(screenName) {
 /************************************************************
  * QR SCAN
  ************************************************************/
-
 async function openQRScanner() {
   stopQRScanner();
   navigateToScreen("scan");
@@ -138,10 +149,10 @@ async function openQRScanner() {
     video.setAttribute("playsinline", true);
     await video.play();
 
-    scanStatus.textContent = "Scanning...";
+    scanStatus.textContent = "กำลังสแกน...";
     requestAnimationFrame(scanQRFrame);
   } catch (err) {
-    scanStatus.textContent = "Camera error";
+    scanStatus.textContent = "ไม่สามารถเปิดกล้องได้";
   }
 }
 
@@ -154,7 +165,7 @@ function scanQRFrame() {
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0);
 
     const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const code = jsQR(img.data, canvas.width, canvas.height);
@@ -170,11 +181,15 @@ function scanQRFrame() {
 }
 
 async function handleScanResult(text) {
+  showLoading("กำลังดึงข้อมูลอุปกรณ์...");
+  
   const id = text.trim();
   const extinguisher = await fetchExtinguisherById(id);
 
+  hideLoading();
+
   if (!extinguisher) {
-    alert("ID not found: " + id);
+    alert("ไม่พบหมายเลขถัง: " + id);
     navigateToScreen("home");
     return;
   }
@@ -185,6 +200,7 @@ async function handleScanResult(text) {
   showDetailScreen(extinguisher);
 }
 
+
 function stopQRScanner() {
   if (videoStream) {
     videoStream.getTracks().forEach((t) => t.stop());
@@ -193,24 +209,37 @@ function stopQRScanner() {
 }
 
 /************************************************************
- * DETAIL SCREEN
+ * DETAIL
  ************************************************************/
 function showDetailScreen(ext) {
-  document.getElementById("detail-equipment-id").textContent = ext.id;
-  document.getElementById("detail-location").textContent = ext.location;
-  document.getElementById("detail-type").textContent = ext.type;
-  document.getElementById("detail-size").textContent = ext.size;
-  document.getElementById("detail-last-inspection").textContent = ext.lastInspection;
-  document.getElementById("detail-expiry").textContent = ext.expiryDate;
+  safeSet("detail-equipment-id", ext.id);
+  safeSet("detail-location", ext.location);
+  safeSet("detail-type", ext.type);
+  safeSet("detail-size", ext.size);
+  safeSet("detail-last-inspection", ext.lastInspection);
+  safeSet("detail-expiry", ext.expiryDate);
 
-  // ⭐ เพิ่มตรงนี้
+  // แสดงสถานะ
   const statusEl = document.getElementById("detail-status");
   statusEl.textContent = ext.status || "-";
+  statusEl.className =
+    "badge " +
+    (ext.status === "Good"
+      ? "badge-good"
+      : ext.status === "Need Service"
+      ? "badge-bad"
+      : "badge-warning");
 
-  // เปลี่ยนสี badge ตามสถานะ
-  statusEl.className = "badge " +
-    (ext.status === "Good" ? "badge-good" :
-    ext.status === "Need Service" ? "badge-bad" : "badge-warning");
+  // ============ เพิ่มรูปจากชีต ===============  
+    const imgEl = document.getElementById("detail-image");
+
+    // โหลดรูปจาก root ของโปรเจกต์ เช่น E001.jpg
+    if (ext.id) {
+        imgEl.src = `${ext.id}.jpg`;    // 👉 รูปอยู่บน root
+        imgEl.style.display = "block";
+    } else {
+        imgEl.style.display = "none";
+    }
 
   navigateToScreen("detail");
 }
@@ -219,29 +248,26 @@ function showDetailScreen(ext) {
 /************************************************************
  * INSPECTION
  ************************************************************/
-
 function startInspection() {
   inspectionData = {
     pressure_ok: null,
-    no_damage: null,
     seal_intact: null,
-    label_readable: null,
-    weight_ok: null,
     hose_ok: null,
     expiry_valid: null,
   };
 
   document.getElementById("inspector-name").value = "";
   document.getElementById("remarks").value = "";
-  document.querySelectorAll(".toggle-btn").forEach((btn) => {
-    btn.classList.remove("active-yes", "active-no");
-  });
 
-  document.getElementById("inspection-equipment-id").textContent =
-    currentEquipmentId;
+  document.querySelectorAll(".toggle-btn").forEach((btn) =>
+    btn.classList.remove("active-yes", "active-no")
+  );
+
+  safeSet("inspection-equipment-id", currentEquipmentId);
 
   navigateToScreen("inspection");
 }
+
 
 function updateSubmitButton() {
   const allFilled = Object.values(inspectionData).every((v) => v !== null);
@@ -253,55 +279,55 @@ function updateSubmitButton() {
 }
 
 async function submitInspection() {
+  showLoading("กำลังบันทึกข้อมูล...");
+  
   const inspectorName = document.getElementById("inspector-name").value.trim();
   const remarks = document.getElementById("remarks").value.trim();
 
-  const failCount = Object.values(inspectionData)
-    .filter(v => v === "NO").length;
+  const failCount = Object.values(inspectionData).filter(
+    (v) => v === "NO"
+  ).length;
 
   const result = failCount === 0 ? "Pass" : "Fail";
 
   const record = {
     equipment_id: currentEquipmentId,
     inspector_name: inspectorName,
-    pressure_ok: inspectionData.pressure_ok,
-    no_damage: inspectionData.no_damage,
-    seal_intact: inspectionData.seal_intact,
-    label_readable: inspectionData.label_readable,
-    weight_ok: inspectionData.weight_ok,
-    hose_ok: inspectionData.hose_ok,
-    expiry_valid: inspectionData.expiry_valid,
+    ...inspectionData,
     remarks,
     result,
   };
 
+  const form = new URLSearchParams();
+  form.append("action", "submitInspection");
+  form.append("payload", JSON.stringify(record));
 
-  const res = await submitInspectionToServer(record);
+  const res = await fetch(API_BASE, {
+    method: "POST",
+    body: form,
+  }).then((r) => r.json());
+
+  hideLoading();
 
   if (!res.success) {
-    alert("Error saving inspection");
+    alert("บันทึกข้อมูลไม่สำเร็จ");
     return;
   }
 
-  allInspections.push({
-    ...record,
-    timestamp: new Date().toISOString(),
-  });
+  allInspections.push({ ...record, timestamp: new Date().toISOString() });
 
-  updateStats();
+  updateDashboard();
   showResultScreen(result, inspectorName);
 }
 
 /************************************************************
- * RESULT SCREEN
+ * RESULT
  ************************************************************/
-
 function showResultScreen(result, inspector) {
-  document.getElementById("result-equipment-id").textContent = currentEquipmentId;
-  document.getElementById("result-status").textContent = result;
-  document.getElementById("result-inspector").textContent = inspector;
-  document.getElementById("result-timestamp").textContent =
-    new Date().toLocaleString();
+  safeSet("result-equipment-id", currentEquipmentId);
+  safeSet("result-status", result);
+  safeSet("result-inspector", inspector);
+  safeSet("result-timestamp", new Date().toLocaleString());
 
   navigateToScreen("result");
 }
@@ -310,43 +336,34 @@ function showResultScreen(result, inspector) {
  * HISTORY
  ************************************************************/
 function renderHistory() {
-  const container = document.getElementById("history-list");
+  const box = document.getElementById("history-list");
 
-  if (!allInspections || allInspections.length === 0) {
-    container.innerHTML = "<div>No inspections yet</div>";
+  if (!allInspections.length) {
+    box.innerHTML = "<div>ยังไม่มีประวัติ</div>";
     return;
   }
 
-  container.innerHTML = allInspections
+  box.innerHTML = allInspections
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
     .map((i) => {
-      
-      // Map ผลลัพธ์เป็นสีแบบเดียวกับ status
-      let statusClass = "status-badge";
-      if (i.result === "Pass") statusClass += " status-good";
-      else if (i.result === "Fail") statusClass += " status-bad";
-      else statusClass += " status-warn";
+      let statusClass =
+        "status-badge " +
+        (i.result === "Pass"
+          ? "status-good"
+          : i.result === "Fail"
+          ? "status-bad"
+          : "status-warn");
 
       return `
         <div class="history-item">
-
-          <!-- Header: ID + ผลลัพธ์ -->
-          <div class="history-header" 
-               style="display:flex; align-items:center; gap:20px;">
-            
+          <div class="history-header" style="display:flex; align-items:center; gap:20px;">
             <span class="history-id">${i.equipment_id}</span>
             <span class="history-date">${i.inspector_name}</span>
-
-            <span class="${statusClass}" style="margin-left:auto;">
-              ${i.result}
-            </span>
+            <span class="${statusClass}" style="margin-left:auto;">${i.result}</span>
           </div>
-
-          <!-- วันที่ตรวจ -->
-          <div class="history-inspector" style="margin-top:4px;">
-            ตรวจวันที่: ${formatDateTH(i.timestamp)}
-          </div>
-
+          <div class="history-inspector">ตรวจวันที่: ${formatDateTH(
+            i.timestamp
+          )}</div>
         </div>
       `;
     })
@@ -354,50 +371,166 @@ function renderHistory() {
 }
 
 /************************************************************
- * STATS
+ * ALERTS
  ************************************************************/
+function renderAlerts() {
+  const now = new Date();
+  const alert1 = [];
+  const alert6 = [];
 
-function updateStats() {
-  const today = new Date().toDateString();
-  const todayCount = allInspections.filter(
-    (i) =>
-      new Date(i.timestamp).toDateString() === today
+  extinguisherList.forEach((ext) => {
+    if (!ext.lastInspection) return;
+
+    const d = parseDateSafe(ext.lastInspection);
+    if (!d) return;
+
+    const diff = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+
+    if (diff >= 180) {
+      alert6.push(`
+        <div class="alert-item">
+          <span class="id">${ext.id}</span>
+          <span class="days">${diff} วัน</span>
+        </div>`);
+    } else if (diff >= 30) {
+      alert1.push(`
+        <div class="alert-item">
+          <span class="id">${ext.id}</span>
+          <span class="days">${diff} วัน</span>
+        </div>`);
+    }
+  });
+
+  document.getElementById("alert-1m").innerHTML =
+    alert1.length ? alert1.join("") : `<span style="opacity:.6">ไม่มี</span>`;
+
+  document.getElementById("alert-6m").innerHTML =
+    alert6.length ? alert6.join("") : `<span style="opacity:.6">ไม่มี</span>`;
+}
+
+/************************************************************
+ * DASHBOARD
+ ************************************************************/
+function updateDashboard() {
+  if (!extinguisherList.length) return;
+
+  const now = new Date();
+  const todayStr = now.toDateString();
+
+  const today = allInspections.filter(
+    (i) => new Date(i.timestamp).toDateString() === todayStr
   ).length;
 
-  document.getElementById("today-count").textContent = todayCount;
-  document.getElementById("total-count").textContent =
-    allInspections.length;
+  const weekAgo = new Date();
+  weekAgo.setDate(now.getDate() - 7);
+
+  const week = allInspections.filter(
+    (i) => new Date(i.timestamp) >= weekAgo
+  ).length;
+
+  const monthAgo = new Date();
+  monthAgo.setMonth(now.getMonth() - 1);
+
+  const month = allInspections.filter(
+    (i) => new Date(i.timestamp) >= monthAgo
+  ).length;
+
+  const total = allInspections.length;
+
+  safeSet("sum-today", today);
+  safeSet("sum-week", week);
+  safeSet("sum-month", month);
+  safeSet("sum-total", total);
+
+  safeSet("sum-checked", total);
+  safeSet("sum-unchecked", extinguisherList.length - total);
+
+  renderAlerts();
+}
+
+/************************************************************
+ * LIST ALL EXTINGUISHERS
+ ************************************************************/
+function renderExtinguisherList(list) {
+  const box = document.getElementById("ext-list");
+  const empty = document.getElementById("ext-empty");
+
+  if (!list.length) {
+    empty.style.display = "block";
+    box.innerHTML = "";
+    return;
+  }
+
+  empty.style.display = "none";
+
+  box.innerHTML = list
+    .map((e) => {
+      const badge =
+        e.status === "Good"
+          ? "status-good"
+          : e.status === "Need Service"
+          ? "status-bad"
+          : "status-warn";
+
+      return `
+        <div class="history-item" onclick="selectExtinguisher('${e.id}')">
+          <div class="history-header" style="display:flex; align-items:center; gap:20px;">
+            <span class="history-id">${e.id}</span>
+            <span class="history-date">${e.type}</span>
+            <span class="status-badge ${badge}" style="margin-left:auto;">${e.status}</span>
+          </div>
+
+          <div class="history-inspector">${e.location}</div>
+          <div class="history-date-small">ตรวจล่าสุด: ${formatDateTH(
+            e.lastInspection
+          )}</div>
+        </div>`;
+    })
+    .join("");
+}
+
+async function selectExtinguisher(id) {
+  const ext = await fetchExtinguisherById(id);
+  if (!ext) {
+    alert("ไม่พบรหัสนี้");
+    return;
+  }
+  currentExtinguisher = ext;
+  currentEquipmentId = ext.id;
+  showDetailScreen(ext);
 }
 
 /************************************************************
  * INIT
  ************************************************************/
-
 (async function init() {
+  showLoading("กำลังโหลดข้อมูลจากระบบ...");
+
   await loadInspections();
-  // เริ่มต้นที่หน้า home
+  await loadAllExtinguishers();
+  updateDashboard();
+
+  hideLoading();
   navigateToScreen("home");
 })();
 
 
-
 /************************************************************
- * TOGGLE BUTTON HANDLER
+ * TOGGLE BUTTONS
  ************************************************************/
-
 document.querySelectorAll(".toggle-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     const q = btn.dataset.question;
     let value = btn.dataset.value;
 
-    // แปลงเป็น YES/NO/NA เพื่อให้ตรงกับ Sheet
-    if (value === "yes") value = "YES";
-    if (value === "no") value = "NO";
-    if (value === "na") value = "NA";
+    value =
+      value === "yes" ? "YES" : value === "no" ? "NO" : value === "na" ? "NA" : null;
 
     document
       .querySelectorAll(`.toggle-btn[data-question="${q}"]`)
-      .forEach((b) => b.classList.remove("active-yes", "active-no"));
+      .forEach((b) =>
+        b.classList.remove("active-yes", "active-no")
+      );
 
     btn.classList.add(
       value === "YES" ? "active-yes" : value === "NO" ? "active-no" : ""
@@ -405,60 +538,43 @@ document.querySelectorAll(".toggle-btn").forEach((btn) => {
 
     const map = {
       pressure: "pressure_ok",
-      damage: "no_damage",
       seal: "seal_intact",
-      label: "label_readable",
-      weight: "weight_ok",
       hose: "hose_ok",
-      expiry: "expiry_valid"
+      expiry: "expiry_valid",
     };
 
 
     inspectionData[map[q]] = value;
+
     updateSubmitButton();
   });
 });
 
-
 /************************************************************
- * BOTTOM NAV
+ * MAIN BUTTON EVENTS
  ************************************************************/
+if (document.getElementById("scan-btn")) {
+  document.getElementById("scan-btn").addEventListener("click", openQRScanner);
+}
 
-document.querySelectorAll(".nav-item").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".nav-item")
-      .forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    const screen = btn.dataset.screen;
-    navigateToScreen(screen);
-
-    if (screen === "all-ext") loadAllExtinguishers();
+document
+  .getElementById("stop-scan-btn")
+  .addEventListener("click", () => {
+    stopQRScanner();
+    navigateToScreen("home");
   });
-});
-
-
-/************************************************************
- * BUTTON EVENTS
- ************************************************************/
-
-document.getElementById("scan-btn").addEventListener("click", openQRScanner);
-document.getElementById("stop-scan-btn").addEventListener("click", () => {
-  stopQRScanner();
-  navigateToScreen("home");
-});
 
 document
   .getElementById("start-inspection-btn")
   .addEventListener("click", startInspection);
 
 document
-  .getElementById("back-to-home-btn")
-  .addEventListener("click", () => navigateToScreen("home"));
-
-document
   .getElementById("submit-inspection-btn")
   .addEventListener("click", submitInspection);
+
+document
+  .getElementById("back-to-home-btn")
+  .addEventListener("click", () => navigateToScreen("home"));
 
 document
   .getElementById("cancel-inspection-btn")
@@ -472,84 +588,36 @@ document
   .getElementById("view-history-btn")
   .addEventListener("click", () => navigateToScreen("history"));
 
-  async function selectExtinguisher(id) {
-  // โหลดข้อมูลจาก API (เหมือนสแกน)
-  const extinguisher = await fetchExtinguisherById(id);
-
-  if (!extinguisher) {
-    alert("ID not found: " + id);
-    return;
-  }
-
-  currentExtinguisher = extinguisher;
-  currentEquipmentId = extinguisher.id;
-
-  showDetailScreen(extinguisher);
-}
-
-function renderExtinguisherList(list) {
-  const box = document.getElementById("ext-list");
-  const empty = document.getElementById("ext-empty");
-
-  if (!list || list.length === 0) {
-    box.innerHTML = "";
-    empty.style.display = "block";
-    return;
-  }
-
-  empty.style.display = "none";
-
-  box.innerHTML = list
-    .map((e) => {
-      let statusClass = "status-badge";
-
-      if (e.status === "Good") statusClass += " status-good";
-      else if (e.status === "Need Service") statusClass += " status-bad";
-      else statusClass += " status-warn";
-
-      return `
-        <div class="history-item" onclick="selectExtinguisher('${e.id}')">
-
-          <div class="history-header" style="display:flex; align-items:center; gap:20px;">
-            <span class="history-id">${e.id}</span>
-            <span class="history-date">${e.type}</span>
-
-            <span class="${statusClass}" style="margin-left:auto;">
-              ${e.status}
-            </span>
-          </div>
-
-          <div class="history-inspector">${e.location}</div>
-
-          <!-- ⭐ แปลงวันที่ ISO → ไทย -->
-          <div class="history-date-small" style="font-size:12px; color:#6b7280; margin-top:16px;">
-            ตรวจล่าสุด: ${formatDateTH(e.lastInspection)}
-          </div>
-
-        </div>
-      `;
-    })
-    .join("");
-}
-
-
 /************************************************************
- * LOAD ALL EXTINGUISHERS (NEW)
+ * BOTTOM NAV — FIXED 100%
  ************************************************************/
-async function loadAllExtinguishers() {
-  showExtLoading(); // ← แสดงโหลดก่อน
+document.querySelectorAll(".nav-item").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
 
-  try {
-    const res = await fetch(`${API_BASE}?action=getExtinguishers`);
-    const data = await res.json();
+    const screen = btn.dataset.screen;
 
-    if (!data.success) {
-      console.error("API Error:", data.message);
+    if (screen === "scan") return openQRScanner();
+
+    if (screen === "all-ext") {
+      navigateToScreen("all-ext");
+      loadAllExtinguishers();
       return;
     }
 
-    renderExtinguisherList(data.extinguishers);
-  } catch (err) {
-    console.error("Load Extinguishers Error:", err);
-  }
+    navigateToScreen(screen);
+  });
+});
+
+/************************************************************
+ * GLOBAL LOADING OVERLAY
+ ************************************************************/
+function showLoading(text = "กำลังโหลดข้อมูล...") {
+  document.getElementById("loading-text").textContent = text;
+  document.getElementById("loading-overlay").style.display = "flex";
+}
+
+function hideLoading() {
+  document.getElementById("loading-overlay").style.display = "none";
 }

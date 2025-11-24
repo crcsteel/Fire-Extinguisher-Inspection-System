@@ -1,192 +1,253 @@
-/* ===============================
-   GLOBAL & RESET
-=============================== */
-
-html, body {
-  touch-action: manipulation;     /* ปิด double-tap zoom */
-  -webkit-text-size-adjust: 100%; /* ป้องกัน iPhone ซูม font */
+/* ===========================
+   GLOBAL
+=========================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html, body {
   height: 100%;
+}
+
+body {
+  touch-action: manipulation;        /* ลดโอกาส zoom จาก double tap */
+  font-family: "K2D", sans-serif;
+  background: radial-gradient(circle at top, #ff4b4b 0%, #1a0004 45%, #050308 100%);
+  color: #e5e7eb;
   overflow-x: hidden;
-  background: #f8fafc;
 }
 
-* {
-  box-sizing: border-box;
-  font-family: 'K2D', sans-serif;
+/* ใช้ K2D ทุกอย่าง */
+body, input, button, textarea {
+  font-family: "K2D", sans-serif;
 }
 
-/* ไม่ให้ FontAwesome โดน Override */
-.fa-solid, .fa-regular, .fa-brands, .fas, .far, .fab {
+/* ยกเว้นไอคอน FontAwesome */
+.fa-solid,
+.fa-regular,
+.fa-brands,
+.fas,
+.far,
+.fab {
   font-family: "Font Awesome 6 Free" !important;
-  font-weight: 900 !important;
+  font-weight: 800 !important;
 }
 
-/* ===============================
+/* ===========================
    APP CONTAINER
-=============================== */
-
+=========================== */
 .app-container {
-  max-width: 480px;      /* เหมาะที่สุดสำหรับ Mobile App UI */
+  max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  background: white;
+  background: radial-gradient(circle at top, #1b1b23 0%, #050509 60%, #020103 100%);
+  color: #f9fafb;
   position: relative;
-  padding-bottom: 80px;  /* กันพื้นที่ Bottom Nav */
+  padding-bottom: 80px; /* space for bottom nav */
 }
 
-/* ===============================
+/* ทำให้ดูเป็นมือถือโค้งมน เวลาเปิดบนจอใหญ่ */
+@media (min-width: 600px) {
+  .app-container {
+    margin-top: 16px;
+    margin-bottom: 16px;
+    border-radius: 32px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65);
+    overflow: hidden;
+  }
+}
+
+/* ===========================
    HEADER
-=============================== */
-
+=========================== */
 .header {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  background: linear-gradient(135deg, #111827 0%, #020617 40%, #7f1d1d 100%);
+  color: #f9fafb;
+  padding: 16px 20px;
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
 }
 
-.header h1 {
+.header h3 {
   margin: 0;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
 }
 
 .header p {
-  margin: 4px 0 0 0;
-  font-size: 13px;
-  opacity: 0.9;
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: 0.85;
 }
 
-/* ===============================
-   CONTENT
-=============================== */
-
+/* ===========================
+   CONTENT WRAPPER
+=========================== */
 .content {
-  padding: 20px;
+  padding: 18px 18px 24px;
 }
 
-/* ===============================
-   HOME SCREEN UI
-=============================== */
-
+/* ===========================
+   HOME / HERO
+=========================== */
 .scan-hero {
   text-align: center;
-  padding: 40px 20px;
+  padding: 32px 16px 24px;
 }
 
+.scan-hero h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #fef2f2;
+}
+
+.scan-hero p {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* วงกลมไอคอนตรงกลางแบบ Glow */
+.scan-hero .hero-circle {
+  width: 150px;
+  height: 150px;
+}
+
+/* คุณใช้ inline style อยู่แล้วเลยไม่กำหนดซ้ำ แค่เพิ่มเอฟเฟกต์ใกล้เคียง */
+.scan-hero i.fa-fire-extinguisher {
+  text-shadow: 0 0 18px rgba(248, 113, 113, 0.8);
+}
+
+/* ปุ่มสแกนใหญ่แบบแอพจริง */
 .scan-button {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 40%, #dc2626 100%);
+  color: #ffffff;
   border: none;
-  padding: 18px 40px;
-  border-radius: 12px;
-  font-size: 18px;
+  padding: 16px 32px;
+  border-radius: 999px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   width: 100%;
-  max-width: 300px;
-  margin-top: 20px;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-  transition: 0.2s;
+  max-width: 280px;
+  margin: 0 auto;
+  box-shadow: 0 12px 30px rgba(248, 113, 113, 0.45);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
 }
 
 .scan-button:active {
-  transform: scale(0.98);
+  transform: scale(0.97) translateY(1px);
+  box-shadow: 0 6px 16px rgba(248, 113, 113, 0.4);
+  opacity: 0.9;
 }
 
-/* QUICK STATS */
-
+/* ===========================
+   QUICK STATS
+=========================== */
 .quick-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 32px;
+  margin-top: 26px;
 }
 
 .stat-card {
-  background: #f1f5f9;
-  padding: 16px;
-  border-radius: 12px;
+  background: radial-gradient(circle at top, #111827 0%, #020617 75%);
+  border-radius: 18px;
+  padding: 12px 10px;
   text-align: center;
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
 }
 
 .stat-value {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
-  color: #3b82f6;
+  color: #f97316;
   margin: 0;
 }
 
 .stat-label {
-  font-size: 13px;
-  color: #64748b;
-  margin: 4px 0 0;
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 2px;
 }
 
-/* ===============================
-   CARD & DETAILS
-=============================== */
-
+/* ===========================
+   GENERIC CARD
+=========================== */
 .card {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
+  background: radial-gradient(circle at top left, #111827 0%, #020617 60%);
+  border-radius: 22px;
+  padding: 18px 16px;
   margin-bottom: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid rgba(75, 85, 99, 0.7);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.7);
 }
 
+/* ===========================
+   DETAIL CARD
+=========================== */
 .card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .card-title {
   font-size: 16px;
   font-weight: 600;
+  color: #f9fafb;
 }
 
+/* Badge ใช้สถานะ Good / Need Service / Expired */
 .badge {
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
   font-weight: 600;
+  border: 1px solid transparent;
 }
 
 .badge-good {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(22, 163, 74, 0.15);
+  color: #bbf7d0;
+  border-color: rgba(34, 197, 94, 0.5);
 }
 
-.badge-service {
-  background: #fef3c7;
-  color: #92400e;
+.badge-bad {
+  background: rgba(248, 113, 113, 0.18);
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.7);
 }
 
-.badge-expired {
-  background: #fee2e2;
-  color: #991b1b;
+.badge-warning {
+  background: rgba(234, 179, 8, 0.15);
+  color: #fef9c3;
+  border-color: rgba(250, 204, 21, 0.7);
 }
 
-/* ===============================
-   INFO GRID
-=============================== */
-
+/* GRID รายละเอียดถัง */
 .info-grid {
   display: grid;
-  gap: 12px;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #f1f5f9;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(31, 41, 55, 0.9);
 }
 
 .info-row:last-child {
@@ -194,31 +255,33 @@ html, body {
 }
 
 .info-label {
-  font-size: 14px;
-  color: #64748b;
+  font-size: 12px;
+  color: #9ca3af;
 }
 
 .info-value {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #1e293b;
+  color: #e5e7eb;
+  text-align: right;
 }
 
-/* ===============================
-   CHECKLIST & TOGGLE
-=============================== */
-
+/* ===========================
+   CHECKLIST
+=========================== */
 .checklist-item {
-  background: #f8fafc;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 12px;
+  background: radial-gradient(circle at top, #111827 0%, #020617 70%);
+  padding: 14px 12px;
+  border-radius: 18px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(55, 65, 81, 0.9);
 }
 
 .checklist-question {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
-  margin-bottom: 12px;
+  color: #e5e7eb;
+  margin-bottom: 10px;
 }
 
 .toggle-group {
@@ -228,61 +291,74 @@ html, body {
 
 .toggle-btn {
   flex: 1;
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-  border: 2px solid #e2e8f0;
-  font-size: 14px;
+  padding: 8px 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(75, 85, 99, 0.9);
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    transform 0.08s ease;
+}
+
+.toggle-btn:active {
+  transform: scale(0.97);
 }
 
 .toggle-btn.active-yes {
-  background: #dcfce7;
+  background: rgba(21, 128, 61, 0.85);
   border-color: #22c55e;
-  color: #166534;
+  color: #eafff4;
 }
 
 .toggle-btn.active-no {
-  background: #fee2e2;
+  background: rgba(185, 28, 28, 0.85);
   border-color: #ef4444;
-  color: #991b1b;
+  color: #fee2e2;
 }
 
 .toggle-btn.active-na {
-  background: #e0e7ff;
+  background: rgba(30, 64, 175, 0.7);
   border-color: #6366f1;
-  color: #3730a3;
+  color: #e0f2fe;
 }
 
-/* ===============================
+/* ===========================
    FORM
-=============================== */
-
+=========================== */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .form-label {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
   display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  margin-bottom: 6px;
 }
 
 .form-input {
   width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 2px solid #e2e8f0;
-  font-size: 15px;
-  transition: border-color 0.2s;
+  padding: 10px 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  background: #020617;
+  color: #f9fafb;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-input::placeholder {
+  color: #6b7280;
 }
 
 .form-input:focus {
-  outline: none;
-  border-color: #3b82f6;
+  border-color: #f97316;
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.6);
 }
 
 textarea.form-input {
@@ -290,180 +366,481 @@ textarea.form-input {
   resize: vertical;
 }
 
-/* ===============================
+/* ===========================
    BUTTONS
-=============================== */
-
+=========================== */
 .btn {
   width: 100%;
-  padding: 16px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
+  padding: 14px 16px;
+  border-radius: 999px;
   border: none;
-  transition: 0.2s;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 40%, #dc2626 100%);
+  color: #ffffff;
+  box-shadow: 0 14px 30px rgba(248, 113, 113, 0.55);
+}
+
+.btn-primary:active {
+  transform: scale(0.97) translateY(1px);
+  box-shadow: 0 8px 18px rgba(248, 113, 113, 0.45);
+  opacity: 0.95;
 }
 
 .btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
-  margin-top: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  margin-top: 10px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.65);
+}
+
+.btn-secondary:active {
+  transform: scale(0.97) translateY(1px);
+  opacity: 0.95;
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  color: white;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 60%);
+  color: #f9fafb;
+  box-shadow: 0 14px 30px rgba(34, 197, 94, 0.5);
 }
 
-/* ===============================
-   RESULT UI
-=============================== */
+.btn-success:active {
+  transform: scale(0.97) translateY(1px);
+}
 
+/* ปุ่ม disabled */
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ===========================
+   RESULT SCREEN
+=========================== */
 .result-icon {
-  width: 100px;
-  height: 100px;
-  font-size: 48px;
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 18px;
   border-radius: 50%;
-  margin: 0 auto 24px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  box-shadow: 0 0 40px rgba(34, 197, 94, 0.4);
 }
 
-.result-pass { background: #dcfce7; color: #166534; }
-.result-fail { background: #fee2e2; color: #991b1b; }
+.result-pass {
+  background: radial-gradient(circle at top, #22c55e, #14532d 70%);
+  color: #ecfdf5;
+}
+
+.result-fail {
+  background: radial-gradient(circle at top, #ef4444, #7f1d1d 70%);
+  color: #fef2f2;
+  box-shadow: 0 0 40px rgba(248, 113, 113, 0.55);
+}
 
 .result-title {
   text-align: center;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
-/* ===============================
-   HISTORY
-=============================== */
+.result-subtitle {
+  text-align: center;
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 22px;
+}
 
+/* ===========================
+   HISTORY LIST
+=========================== */
 .history-item {
-  padding: 16px;
-  border-radius: 12px;
-  background: white;
-  margin-bottom: 12px;
-  border: 1px solid #e2e8f0;
-  transition: 0.2s;
+  background: radial-gradient(circle at top left, #111827 0%, #020617 80%);
+  padding: 14px 13px;
+  border-radius: 18px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .history-item:active {
   transform: scale(0.98);
-  background: #f8fafc;
+  background: radial-gradient(circle at top left, #1f2937 0%, #020617 80%);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.75);
 }
 
-/* ===============================
-   SCREENS
-=============================== */
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 4px;
+}
 
+.history-id {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.history-date {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.history-inspector {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.history-date-small {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* ป้ายสถานะ PASS / FAIL / อื่น ๆ */
+.status-badge {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.status-good {            /* PASS → เขียว */
+  background: rgba(22, 163, 74, 0.18);
+  color: #bbf7d0;
+  border: 1px solid rgba(34, 197, 94, 0.7);
+}
+
+.status-bad {             /* FAIL → แดง */
+  background: rgba(248, 113, 113, 0.2);
+  color: #fecaca;
+  border: 1px solid rgba(248, 113, 113, 0.8);
+}
+
+.status-warn {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fef9c3;
+  border: 1px solid rgba(250, 204, 21, 0.8);
+}
+
+/* ===========================
+   LOADING / SKELETON
+=========================== */
+.loading {
+  text-align: center;
+  padding: 32px 16px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* Skeleton card สำหรับตอนโหลด List ถัง */
+.skeleton-card {
+  height: 64px;
+  border-radius: 18px;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #111827 0%, #1f2937 50%, #111827 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.1s linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ===========================
+   SCREENS
+=========================== */
 .screen {
   display: none;
-  width: 100%;
 }
 
 .screen.active {
   display: block;
 }
 
-/* ===============================
-   QR VIDEO
-=============================== */
-
-#qr-video {
-  width: 100%;
-  border-radius: 12px;
-  background: #000;
-  object-fit: cover;
-}
-
-/* ===============================
+/* ===========================
    BOTTOM NAV
-=============================== */
-
+=========================== */
 .bottom-nav {
   position: fixed;
+  left: 0;
+  right: 0;
   bottom: 0;
-  left: 0; right: 0;
   max-width: 480px;
-  background: white;
   margin: 0 auto;
-  padding: 10px 0;
+  background: rgba(3, 7, 18, 0.98);
+  border-top: 1px solid rgba(31, 41, 55, 0.9);
   display: flex;
   justify-content: space-around;
-  border-top: 1px solid #e2e8f0;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+  padding: 8px 8px 10px;
+  box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(20px);
 }
 
 .nav-item {
-  background: none;
+  flex: 1;
   border: none;
+  background: transparent;
+  color: #6b7280;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.nav-item i {
+  font-size: 18px;
+}
+
+.nav-item.active {
+  color: #f97316;
+}
+
+.nav-item.active i {
+  text-shadow: 0 0 10px rgba(248, 113, 113, 0.7);
+}
+
+/* ===========================
+   SCAN VIDEO
+=========================== */
+#qr-video {
+  border-radius: 18px !important;
+  background: #000;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
+}
+
+/* Margin Utils */
+.mt-24 {
+  margin-top: 24px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.summary-card {
+  background: #0f172a;
+  border-radius: 16px;
+  padding: 14px 16px;
+  border: 1px solid #1e293b;
   text-align: center;
-  color: #94a3b8;
 }
 
-.nav-item i { font-size: 22px; }
-
-.nav-item.active { color: #3b82f6; }
-
-/* margin utilities */
-.mt-24 { margin-top: 24px; }
-
-.skeleton-card {
-  width: 100%;
-  height: 70px;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  background: linear-gradient(
-    90deg,
-    #e0e0e0 25%,
-    #f2f2f2 50%,
-    #e0e0e0 75%
-  );
-  background-size: 400% 100%;
-  animation: skeleton-loading 1.2s ease-in-out infinite;
-}
-
-@keyframes skeleton-loading {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: -100% 0;
-  }
-}
-
-.status-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
+.summary-title {
   font-size: 12px;
+  color: #9ca3af;
+}
+
+.summary-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f97316;
+  margin-top: 4px;
+}
+
+.pf-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 10px 0 22px;
+}
+
+.pass-card, .fail-card {
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.pass-card {
+  background: rgba(52,211,153,0.2);
+  color: #6ee7b7;
+}
+
+.fail-card {
+  background: rgba(248,113,113,0.2);
+  color: #fecaca;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 22px 0 8px;
+}
+
+.alert-card {
+  padding: 14px 16px;
+  border-radius: 16px;
+  margin-bottom: 14px;
+}
+
+.alert-warn {
+  background: rgba(234,179,8,0.18);
+  color: #fef08a;
+}
+
+.alert-danger {
+  background: rgba(248,113,113,0.18);
+  color: #fecaca;
+}
+
+.alert-list {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #1d1d1d;
+}
+
+.alert-box {
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.alert-warn {
+  background: #fff8e1;
+  border-color: #feffb3;
+}
+
+.alert-danger {
+  background: #ffebee;
+  border-color: #ffcdd2;
+}
+
+.alert-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 600;
-  color: white;
-  display: inline-block;
+  color: #ff0000;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.alert-header i {
+  font-size: 18px;
+}
+
+.alert-list {
+  padding-left: 5px;
+}
+
+.alert-item {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  color: #1d1d1d;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.alert-item .id {
+  font-weight: 600;
+}
+
+.alert-item .days {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.blink {
+  animation: glowBlink 1.2s infinite ease-in-out;
+}
+
+@keyframes glowBlink {
+  0%   { opacity: 1; text-shadow: 0 0 4px #ff9800; }
+  50%  { opacity: 0.3; text-shadow: 0 0 12px #ff9800; }
+  100% { opacity: 1; text-shadow: 0 0 4px #ff9800; }
+}
+
+.blink-warn {
+  animation: glowBlinkwarn 1.2s infinite ease-in-out;
+}
+
+@keyframes glowBlinkwarn {
+  0%   { opacity: 1; text-shadow: 0 0 4px #ff3333; }
+  50%  { opacity: 0.3; text-shadow: 0 0 12px  #ff3333; }
+  100% { opacity: 1; text-shadow: 0 0 4px #ff3333; }
+}
+
+/* ==================== FULLSCREEN LOADING OVERLAY ==================== */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.loading-box {
+  background: #ffffff;
+  padding: 30px 40px;
+  border-radius: 16px;
   text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
-/* สีเขียว → Good */
-.status-good {
-  background: #16a34a;
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #ddd;
+  border-top-color: #ef4444;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
 }
 
-/* สีแดง → Need Service */
-.status-bad {
-  background: #dc2626;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-/* สีเหลือง → อื่นๆ / Warning */
-.status-warn {
-  background: #eab308;
+#loading-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.toggle-btn.active {
+  background: #0ea5e9;
+  color: white;
+  border-color: #0284c7;
 }

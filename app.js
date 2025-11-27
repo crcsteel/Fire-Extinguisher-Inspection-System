@@ -3,7 +3,7 @@
  ************************************************************/
 
 const API_BASE =
-  "https://script.google.com/macros/s/AKfycbxj-qD7quy8aW_wnkcm-jZ8XtVHJbaCeeWRl-xHaI6HIDytxNW7xZxeT2lnzO3wCsaO/exec";
+  "https://script.google.com/macros/s/AKfycbzwDTU7fq_XRts-l0MOOBUZLye8MwiRysNkjEV8EceGDyLX5ZpyoJertS98Kq3YhixYDA/exec";
 
 let currentScreen = "home";
 let currentEquipmentId = null;
